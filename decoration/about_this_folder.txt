@@ -1,0 +1,2 @@
+Contains dynamically generated decoration
+(e.g. random trees)
