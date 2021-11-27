@@ -1,5 +1,8 @@
 import pygame
-from vectormath import *
+try:
+  from vectormath import *
+except:
+  from platformer.vectormath import *
 def circle(game,position,radius,color=(255,255,255)):
   position = Vector2(*position)
   size = Vector2(*game.get_size())
