@@ -9,6 +9,8 @@ class Block:
     def __str__(self):#in case we want to change the string method later
         return self.toText()
     __repr__ = __str__ # repr is string for now because list stringify uses repr
+    def toShowOnBlock(self):
+        return [BlockLabelText(self.toText())]
 
 class ParserError(Exception):pass # exception we can catch to find invalid text input (will not cause error but show error on screen)
 
@@ -18,3 +20,10 @@ def typeCheck(arg,type,errorType,errorMessage):
         return type(arg)
     except:pass # raise outside of try block to avoid polluting stack with the type cast error as this will not help the user
     raise errorType(errorMessage)
+class BlockLabelText():
+    def __init__(self,text):
+        self.text = text
+class BlockLabelMultiSelect():
+    def __init__(self,place,index):
+        self.place = place
+        self.index = index

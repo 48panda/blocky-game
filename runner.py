@@ -39,6 +39,8 @@ class Runner:
             self.world.player_y += 1
         else:
             raise ParserError("Invalid action")
+    def get_valid_values(self):
+        return ["player_x","player_y"]
 from world import world
 jeff = Runner([blocks.ifBlock("player_x != 0"),blocks.printBlock("true"),blocks.waitBlock(5),blocks.endifBlock(),blocks.printBlock("end program")],world=world())
 finished = False
