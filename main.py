@@ -4,7 +4,7 @@ import blocks
 import runner
 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
 pygame.font.init()
-program = [blocks.ifBlock("player_x > player_y"),blocks.ifBlock("player_y > 0"),blocks.printBlock("e"),blocks.waitBlock(2),blocks.endifBlock(),blocks.endifBlock(),blocks.jumpBlock(0)]
+program = [blocks.ifBlock("player_x > player_y"),blocks.ifBlock("player_y > 0"),blocks.printBlock("e"),blocks.waitBlock(2),blocks.endifBlock(),blocks.endifBlock(),blocks.jumpBlock(0),blocks.jumpBlock(0)]
 renderer = program_renderer.renderer(screen, program, (0,0), runner.Runner)
 running = True
 while running:

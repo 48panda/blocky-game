@@ -32,11 +32,12 @@ class renderer:
         self.multi_select_args = None
         self.multi_select_rects = []
         self.multi_select_values = []
-        self.multi_select_block_index = None
+        self.multi_select_block = None
         self.multi_select_index = None
         self.multi_add_rect = None
         self.multi_sub_rect = None
         self.multi_int_val = 0
+        self.multi_max_val = 100
     def tick(self,events):
         # this function is called every frame.
         # it calls the renderer and handles inputs
@@ -66,17 +67,17 @@ class renderer:
                     close = True
                     if self.multi_add_rect and self.multi_add_rect.collidepoint(mouse_pos):
                         self.multi_int_val += 1
-                        self.multi_int_val %= 100
+                        self.multi_int_val %= self.multi_max_val
                         close = False
                     if self.multi_sub_rect and self.multi_sub_rect.collidepoint(mouse_pos):
                         self.multi_int_val -= 1
-                        self.multi_int_val %= 100
+                        self.multi_int_val %= self.multi_max_val
                         close = False
                     for v,i in enumerate(self.multi_select_rects):
                         if i.collidepoint(event.pos):
-                            if self.multi_select_values[v] == "number":
+                            if self.multi_select_values[v] == "number" or self.multi_select_values[v] == "address":
                                 self.multi_select_values[v] = self.multi_int_val
-                            self.program[self.multi_select_block_index].setMultiSelect(self.multi_select_index, self.multi_select_values[v])
+                            self.multi_select_block.setMultiSelect(self.multi_select_index, self.multi_select_values[v])
                             break
                     if close:
                         self.openSelector = None
@@ -95,8 +96,10 @@ class renderer:
             options = self.runner.get_valid_values(None) + ["number"]
         elif place == "if_op":
             options = ["==","!=",">","<",">=","<="]
+        elif place == "if_end":
+            options = ["then","and","or"]
         elif place == "jump":
-            options = ["number"]
+            options = ["address"]
         else:
             raise ValueError(f"invalid place {place}")
         if render_dropdown:
@@ -105,7 +108,7 @@ class renderer:
             y_offset = 0
             for i in options:
                 y_offset += 30
-                if i == "number":
+                if i == "number" or i == "address":
                     text = self.fontSmall.render(str(self.multi_int_val).zfill(2), True, (0,0,0))
                     add = self.fontSmall.render("+", True, (0,0,0))
                     sub = self.fontSmall.render("-", True, (0,0,0))
@@ -117,6 +120,11 @@ class renderer:
                     self.multi_sub_rect = pygame.Rect(position[0]+30+30+add.get_width(),position[1]+y_offset,sub.get_width(),30)
                     self.multi_select_rects.append(pygame.Rect(position[0],position[1]+y_offset,50,30))
                     self.multi_select_values.append(i)
+                    if i == "number":
+                        self.multi_max_val = 100
+                    else:
+                        self.multi_max_val = len(self.program)
+                    self.multi_int_val %= self.multi_max_val
                 else:
                     text = self.fontSmall.render(i, True, (0,0,0))
                     pygame.draw.rect(self.screen, color, (position[0],position[1]+y_offset,text.get_width()+20,30))
@@ -133,7 +141,7 @@ class renderer:
         if self.openSelector is not None:
             if len(self.multiSelectRects) == self.openSelector:
                 self.multi_select_args = (position,place,current,color,True)
-                self.multi_select_block_index = self.program.index(block)
+                self.multi_select_block = block
                 self.multi_select_index = index
                 
         self.multiSelectRects.append(pygame.Rect(position[0],position[1],text.get_width()+20,30))
@@ -160,6 +168,39 @@ class renderer:
             if type(i) == BlockLabelMultiSelect:
                 x_pos += self.get_multi_select_width(block.multiSelect[i.index])+10
         return x_pos
+    def render_block(self, position, block,width, indentLevel, selectIndentLevel, offset, x_offset, is_sub_if = False, is_first_if = True):
+        if not is_sub_if and block.prefix == "if":
+            temp_offset = 0
+            first = True
+            for subBlock in block.blockList:
+                temp_width = self.get_block_label_width(subBlock.toShowOnBlock(),subBlock)
+                self.render_block((position[0], position[1]+temp_offset), subBlock,temp_width, indentLevel, selectIndentLevel, offset+temp_offset, x_offset, is_sub_if = True, is_first_if=first)
+                first = False
+                temp_offset += 40
+            return
+        if is_first_if:
+            self.end_of_blocks.append((position[0]+max(200,width+40),position[1]+20))
+        indentColor = (150,150,0)
+        x,y = self.position
+        pygame.draw.rect(self.screen, block.color, (position[0],position[1],max(200,width+40),40))
+        if block.startIndent:
+            pygame.draw.rect(self.screen, block.color, (position[0],position[1],10,50))
+        self.render_block_label((position[0]+25,position[1]+5),block.toShowOnBlock(),block,saturateRGB(block.color,1.5))
+        for i in range(indentLevel): # draw the indents
+            if i < selectIndentLevel:
+                pygame.draw.rect(self.screen, indentColor, (x+i*20,y+offset-10,10,60)) # indents that are not being moved by the user
+            else:
+                # indents that are being moved by the user
+                pygame.draw.rect(self.screen, indentColor, (position[0]-x_offset+(i-selectIndentLevel)*20,position[1]-10,10,60))
+    def get_height_of_y_pos(self, y_pos):
+        current_height = 0
+        index = 0
+        for block in self.program:
+            if current_height + block.height/2 > y_pos:
+                return index
+            current_height += block.height
+            index += 1
+        return index - 1
     def render_program(self):
         self.multi_select_args = None
         x,y = self.position # position extraction for less typing
@@ -167,7 +208,7 @@ class renderer:
         indentLevel = 0
         selectIndentLevel = 0
         selectOffset = 0
-        end_of_blocks = []
+        self.end_of_blocks = []
         indentColor = (150,150,0) # indent color, really should be a list, but this is fine for now
         mouse_pos = pygame.mouse.get_pos()
         renderOpenMultiSelectArgs = []
@@ -175,7 +216,7 @@ class renderer:
         endIndex = self.selected + 1 if self.selected is not None else None
         self.multiSelectRects = []
         if self.selected is not None:
-            newIndex = (mouse_pos[1] - self.position[1])//50 # get the index of the block the mouse is over (which is where we want to insert the selected block)
+            newIndex = self.get_height_of_y_pos(mouse_pos[1] - self.position[1])
             if self.program[startIndex].startIndent: # if the selected block is the start of an indented section, we need to find the end of the indented section
                 #to move the whode section
                 indent = 1
@@ -210,40 +251,19 @@ class renderer:
                 selectIndentLevel = indentLevel # to render the indents at the correct positions
             if startIndex is not None and i >= startIndex and i < endIndex: # if the block is being selected
                 x_offset = (indentLevel-selectIndentLevel)*20 # set x offset because now we don't care about indents outside the selection
-                pygame.draw.rect(self.screen, block.color,# draw the block
-                    (mouse_pos[0] - self.selected_anchor[0] + x_offset, # x is at the cursor, but offset by the anchor point so when initially selected,
-                    #the block doesn't move
-                    mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset, # same with y
-                    max(200,width+40), # blocks are at least 200 pixels wide but longer if they need to fit more text
-                    40)) # blocks are 40 pixels tall (with 10px gap)
-                end_of_blocks.append((mouse_pos[0] - self.selected_anchor[0] + x_offset+max(200,width+40),mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset+20))
-                if block.startIndent: # if the block is the start of an indent, render the indent. only visible if no blocks are inside the indent
-                    pygame.draw.rect(self.screen, block.color, (mouse_pos[0]-self.selected_anchor[0]+x_offset,mouse_pos[1]-self.selected_anchor[1] + offset + selectOffset,10,50))
-                self.render_block_label((mouse_pos[0]-self.selected_anchor[0]+x_offset+5,5+mouse_pos[1]-self.selected_anchor[1] + offset + selectOffset),block.toShowOnBlock(),block,saturateRGB(block.color,1.5))
-                for i in range(indentLevel): # draw the indents
-                    if i < selectIndentLevel:
-                        pygame.draw.rect(self.screen, indentColor, (x+i*20,y+offset-10,10,60)) # indents that are not being moved by the user
-                    else:
-                        # indents that are being moved by the user
-                        pygame.draw.rect(self.screen, indentColor, (mouse_pos[0]-self.selected_anchor[0]+(i-selectIndentLevel)*20,mouse_pos[1]-self.selected_anchor[1] + offset + selectOffset -10,10,60))
+                self.render_block((mouse_pos[0] - self.selected_anchor[0] + x_offset,mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset), block, width,indentLevel,selectIndentLevel, offset, x_offset)
             else:
-                # draw the block
-                pygame.draw.rect(self.screen, block.color, (x+x_offset,y+offset,max(200,width+40),40))
-                end_of_blocks.append((x+x_offset+max(200,width+40),y+offset+20))
-                if block.startIndent: # if the block is the start of an indent, render the indent. only visible if no blocks are inside the indent
-                    pygame.draw.rect(self.screen, block.color, (x+x_offset,y+offset,10,50))
-                self.render_block_label((x+x_offset+25,y+offset+5),block.toShowOnBlock(),block,saturateRGB(block.color,1.5))
-                
-                for i in range(indentLevel): # draw the indents
-                    pygame.draw.rect(self.screen, indentColor, (x+i*20,y+offset-10,10,60))
+                self.render_block((x+x_offset,y+offset), block, width,indentLevel, indentLevel, offset, 0)
             self.rects.append(pygame.Rect(x+x_offset,y+offset,max(200,width+40),40)) # add the rect to the list so we can check if the mouse is over it
-            offset += 50 # move down 50 pixels
+            offset += block.height # move down 50 pixels
             if block.startIndent: 
                 indentLevel += 1 # increase the indent level after rendering it (so it will render correctly)
         self.height = offset # set the height ( used for scrolling)
         random.seed(5)
+        x_pos = 400
         for i,block in enumerate(self.new_program):
             if block.prefix == "jump":
-                draw_arrow(screen, end_of_blocks[i], end_of_blocks[block.jumpLoc], 400, color = randomRGB())
+                draw_arrow(screen, self.end_of_blocks[i], self.end_of_blocks[block.jumpLoc], x_pos, color = randomRGB())
+                x_pos += 20
         if self.multi_select_args:
             self.render_multi_select(*self.multi_select_args)

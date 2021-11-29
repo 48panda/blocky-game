@@ -5,6 +5,7 @@ def getBlockWrapper(blockList):
         return block
     return blockWrapper
 class Block:
+    height = 50
     # base class for blocks
     def __str__(self):#in case we want to change the string method later
         return self.toText()
