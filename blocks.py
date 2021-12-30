@@ -44,8 +44,9 @@ class waitBlock(Block):
     endIndent = False
     prefix = "wait"
     color = (0,255,255)
+    default_args = ["0"]
     def __init__(self, time):
-        typeCheck(time, int, ParserError, "Wait time must be an integer")
+        time = typeCheck(time, int, ParserError, "Wait time must be an integer")
         self.time = time
     def run(self, runner):
         return runner.timesRunCurrent >= self.time
@@ -55,23 +56,26 @@ class waitBlock(Block):
     def fromText(text):
         return waitBlock(text[5:])
 
-#will be deleted, python console not visible in-game
 @blockWrapper
-class printBlock(Block):
-    prefix = "print"
-    startIndent = False
-    endIndent = False
-    color = (255,0,255)
-    def __init__(self, toPrint):
-        typeCheck(toPrint, str, ParserError, "Can only print strings")
-        self.toPrint = toPrint
+class moveBlock(Block):
+    prefix = "move"
+    color = (150,150,0)
+    default_args =["right"]
+    def __init__(self, movement_direction):
+        self.movement_direction =movement_direction
+        self.multiSelect = [self.movement_direction]
+    def setMultiSelect(self, index, value):
+        self.movement_direction = value
+        self.multiSelect[index] = value
     def run(self, runner):
-        print(self.toPrint)
+        runner.move(self.movement_direction)
         return True
     def toText(self):
-        return "print " + str(self.toPrint)
+        return "move " + str(self.movement_direction)
     def fromText(text):
-        return printBlock(text[6:])
+        return moveBlock(text[5:])
+    def toShowOnBlock(self):
+        return [BlockLabelText("move "),BlockLabelMultiSelect("move",0)]
 
 @blockWrapper
 class jumpBlock(Block):
@@ -79,20 +83,21 @@ class jumpBlock(Block):
     startIndent = False
     endIndent = False
     color = (150,150,0)
-    def __init__(self, jumpLoc):
-        typeCheck(jumpLoc, int, ParserError, "Jump location must be an integer")
-        self.jumpLoc = jumpLoc
-        self.multiSelect = [self.jumpLoc]
+    default_args =["0"]
+    def __init__(self, jump_loc):
+        jump_loc = typeCheck(jump_loc, int, ParserError, "Jump location must be an integer")
+        self.jump_loc = jump_loc
+        self.multiSelect = [self.jump_loc]
     def setMultiSelect(self, index, value):
-        self.jumpLoc = value
+        self.jump_loc = value
         self.multiSelect[index] = value
     def run(self, runner):
-        runner.programCounter = self.jumpLoc
+        runner.programCounter = self.jump_loc
         # set program counter
         return False
     def toText(self):
-        return "jump " + str(self.jumpLoc)
+        return "jump " + str(self.jump_loc)
     def fromText(text):
-        return endifBlock(text[5:])
+        return jumpBlock(text[5:])
     def toShowOnBlock(self):
         return [BlockLabelText("jump "),BlockLabelMultiSelect("jump",0)]

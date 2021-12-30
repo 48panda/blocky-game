@@ -10,6 +10,7 @@ class ifBlock(Block):
     startIndent = True
     endIndent = False
     color = (150,150,0)
+    default_args = ["0 == 0 then"]
     def __init__(self, condition):
         self.condition = condition
         self.blockList = []
@@ -23,7 +24,7 @@ class ifBlock(Block):
         wholeBoolean = True
         currentOrSection = False
         for block in self.blockList:
-            currentOrSection = currentOrSection or block.get_true_or_false()
+            currentOrSection = currentOrSection or block.get_true_or_false(runner)
             if block.end != "or":
                 wholeBoolean = wholeBoolean and currentOrSection
                 currentOrSection = False
@@ -92,9 +93,17 @@ class ifSubBlock(Block):
             self.parent.changeEndValue(self, self.end, value)
             self.end = value
         self.multiSelect[index] = value
-    def get_true_or_false(self):
+    def get_true_or_false(self,runner):
         # TODO: VALIDATION
-        return ops[self.operator](self.left_side, self.right_side)
+        left_side = self.left_side
+        right_side = self.right_side
+        if type(left_side) == str:
+            if runner.validate_value_getter(left_side):
+                left_side = runner.value_getter(left_side)
+        if type(right_side) == str:
+            if runner.validate_value_getter(right_side):
+                right_side = runner.value_getter(right_side)
+        return ops[self.operator](left_side, right_side)
     def toShowOnBlock(self):
         if self.isFirst:
             return [BlockLabelText("if "), BlockLabelMultiSelect("if_value", 0),BlockLabelMultiSelect("if_op", 1), BlockLabelMultiSelect("if_value", 2), BlockLabelMultiSelect("if_end", 3)]
@@ -136,12 +145,12 @@ class ifBlock(Block):
         self.multiSelect[index] = value
     def run(self, runner):
         ops = {"==":operator.eq, "!=":operator.ne, ">":operator.gt, "<":operator.lt, ">=":operator.ge, "<=":operator.le}
-        if type(self.left_side) != int and (not runner.validateValueGetter(self.left_side)):
+        if type(self.left_side) != int and (not runner.validate_value_getter(self.left_side)):
             raise ParserError("If statement must have valid values") # this depends on the environment, so it must be done at runtime.
             # Luckily, this is only caused if the user messes with the code or pastes into different environments.
-        if type(self.right_side) != int and (not runner.validateValueGetter(self.right_side)):
+        if type(self.right_side) != int and (not runner.validate_value_getter(self.right_side)):
             raise ParserError("If statement must have valid values")
-        if ops[self.operator](runner.valueGetter(self.left_side), runner.valueGetter(self.right_side)): # if the condition is true, run the code inside the if \
+        if ops[self.operator](runner.value_getter(self.left_side), runner.value_getter(self.right_side)): # if the condition is true, run the code inside the if \
             # (happens to be the next line of code)
             return True
         # if not true, run the next line of code after the corresponding endif
@@ -169,15 +178,37 @@ class endifBlock(Block): # block for the end of an if
     prefix = "endif"
     startIndent = False
     endIndent = True
+    hidden_from_editor = True
     color = (150,150,0)
     def __init__(self):
         pass
     def run(self, runner):
         runner.programCounter += 1
-        runner.tick() # endif block shouldn't take any ticks so we increment program counter and tick
+        runner.tick_runner() # endif block shouldn't take any ticks so we increment program counter and tick
         # i don't know of any side effects of this, but i'm sure there is one.
         return False
     def toText(self):
         return "endif"
     def fromText(text):
         return endifBlock()
+@blockWrapper
+class elseBlock(Block): # block for the end of an if
+    prefix = "else"
+    midIndent = True
+    color = (150,150,0)
+    def __init__(self):
+        pass
+    def run(self, runner):
+        runner.programCounter += 1
+        runner.tick_runner() # endif block shouldn't take any ticks so we increment program counter and tick
+        # i don't know of any side effects of this, but i'm sure there is one.
+        return False
+    def toText(self):
+        return "else"
+    def fromText(text):
+        return elseBlock()
+
+
+ifBlock.blocks_added_after = [endifBlock]
+elseBlock.blocks_added_after = [endifBlock]
+elseBlock.blocks_added_before = [ifBlock]

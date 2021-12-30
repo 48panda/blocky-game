@@ -1,0 +1,27 @@
+{
+    "levels": [
+        {
+            "type": "grid",
+            "blocks": [
+                "move"
+            ],
+            "data": {
+                "grid": [
+                    [ "X","X","X","X","X" ],
+                    [ "X","O","O","O","X" ],
+                    [ "X","X","X","O","X" ],
+                    [ "X","O","O","O","X" ],
+                    [ "X","X","X","X","X" ]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 1,
+                "goal_y": 3,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor"
+                }
+            }
+        }
+    ]
+}

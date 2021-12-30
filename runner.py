@@ -41,13 +41,3 @@ class Runner:
             raise ParserError("Invalid action")
     def get_valid_values(self):
         return ["player_x","player_y"]
-from world import world
-jeff = Runner([blocks.ifBlock("player_x != 0"),blocks.printBlock("true"),blocks.waitBlock(5),blocks.endifBlock(),blocks.printBlock("end program")],world=world())
-finished = False
-i=0
-while not finished:
-    i+=1
-    finished = jeff.tick()
-    if finished: break
-    #time.sleep(1)
-print(i)
