@@ -1,7 +1,20 @@
 {
     "levels": [
-        {
+        {   "name": "Getting Started",
+            "desc": "Learn how to create programs",
             "type": "grid",
+            "color": [75, 144, 209],
+            "children": [1],
+            "challenges":[
+                {
+                    "type": "size",
+                    "value": 6
+                },
+                {
+                    "type": "speed",
+                    "value": 6
+                }
+            ],
             "blocks": [
                 "move"
             ],
@@ -22,6 +35,30 @@
                     "O": "floor"
                 }
             }
+        },
+        {
+            "color": [66, 176, 245],
+            "children":[2,3]
+        },
+        {
+            "color": [66, 212, 245],
+            "children":[4]
+        },
+        {
+            "color": [212, 66, 245],
+            "children":[5]
+        },
+        {
+            "color": [42, 250, 119],
+            "children":[6]
+        },
+        {  
+            "color": [224, 58, 164],
+            "children":[]
+        },
+        {
+            "color": [77, 222, 51],
+            "children":[]
         }
     ]
 }

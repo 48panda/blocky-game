@@ -149,7 +149,7 @@ class renderer:
         self.draw_play_button((10,self.screen.get_height()-190))
         if self.multi_select_args:
             self.render_multi_select(*self.multi_select_args)
-        return self.program
+        return self.program, self.won
     def render_empty_blocks(self,rect_to_use):
         x,y,w,h = rect_to_use
         current_x = x

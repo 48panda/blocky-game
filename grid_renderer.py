@@ -3,6 +3,7 @@ from tiles import tile_key
 import pygame
 
 player = pygame.image.load("assets/player_tile.png")
+goal = pygame.image.load("assets/goal.png")
 
 class grid_renderer(renderer):
     def init_runner(self, world):
@@ -38,6 +39,7 @@ class grid_renderer(renderer):
             for x,cell in enumerate(row):
                 game.blit(pygame.transform.scale(cell.texture, (grid_cell_size, grid_cell_size)), (grid_x + x * grid_cell_size, grid_y + y * grid_cell_size))
         game.blit(pygame.transform.scale(player, (grid_cell_size, grid_cell_size)), (grid_x + self.player_x * grid_cell_size, grid_y + self.player_y * grid_cell_size))
+        game.blit(pygame.transform.scale(goal, (grid_cell_size, grid_cell_size)), (grid_x + self.goal_x * grid_cell_size, grid_y + self.goal_y * grid_cell_size))
         return game
     def value_getter(self, valueToGet):
         if valueToGet == "player x":
@@ -76,3 +78,5 @@ class grid_renderer(renderer):
                 self.player_x += 1
             elif direction == "right":
                 self.player_x -= 1
+    def check_win(self):
+        return self.player_x == self.goal_x and self.player_y == self.goal_y
