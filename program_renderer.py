@@ -17,7 +17,7 @@ def saturateRGB(color, saturateAmount):
 
 class renderer:
     # stuff here is for rendering
-    def __init__(self, screen, program, position, runner, blockList, usable_blocks,/,**kwargs):
+    def __init__(self, screen, blockList, usable_blocks,/,**kwargs):
         self.init_runner(**kwargs)
         self.blocks = blockList
         self.clock = pygame.time.Clock()
@@ -39,10 +39,9 @@ class renderer:
         self.open_selector = None
         self.play_rect = None
         self.playing = False
-        self.position = position
-        self.program = program
+        self.position = (0,0)
+        self.program = []
         self.rects = []
-        self.runner = runner
         self.runner_init_kwargs = kwargs
         self.running = False
         self.screen = screen
@@ -147,6 +146,7 @@ class renderer:
         pygame.draw.rect(self.screen, (128,128,128), (0,self.screen.get_height()-200,self.screen.get_width(),200))
         self.render_empty_blocks((100,self.screen.get_height()-200,self.screen.get_width(),200))
         self.draw_play_button((10,self.screen.get_height()-190))
+        self.render_program(second_time=True)
         if self.multi_select_args:
             self.render_multi_select(*self.multi_select_args)
         return self.program, self.won
@@ -167,7 +167,7 @@ class renderer:
             self.screen.blit(text, (current_x+5,current_y+5))
             self.empty_block_rects[(current_x,current_y,current_w+10,40)] = i
             current_x += current_w + 15
-    def render_multi_select(self, position, place, current, color=(255,255,255), render_dropdown = False,block=None,index = None):
+    def render_multi_select(self, position, place, current, color=(255,255,255), render_dropdown = False,block=None,index = None,second_time=False):
 
         if place == "if_value":
             options = self.get_valid_values() + ["number"]
@@ -191,10 +191,11 @@ class renderer:
                     text = self.font_small.render(str(self.multi_int_val).zfill(2), True, (0,0,0))
                     add = self.font_small.render("+", True, (0,0,0))
                     sub = self.font_small.render("-", True, (0,0,0))
-                    pygame.draw.rect(self.screen, color, (position[0],position[1]+y_offset,30+add.get_width()+sub.get_width()+40,30))
-                    self.screen.blit(text, (position[0]+10,position[1]+y_offset+5))
-                    self.screen.blit(add, (position[0]+20+30,position[1]+y_offset+5))
-                    self.screen.blit(sub, (position[0]+30+30+add.get_width(),position[1]+y_offset+5))
+                    if not second_time:
+                        pygame.draw.rect(self.screen, color, (position[0],position[1]+y_offset,30+add.get_width()+sub.get_width()+40,30))
+                        self.screen.blit(text, (position[0]+10,position[1]+y_offset+5))
+                        self.screen.blit(add, (position[0]+20+30,position[1]+y_offset+5))
+                        self.screen.blit(sub, (position[0]+30+30+add.get_width(),position[1]+y_offset+5))
                     self.multi_add_rect = pygame.Rect(position[0]+20+30,position[1]+y_offset,add.get_width(),30)
                     self.multi_sub_rect = pygame.Rect(position[0]+30+30+add.get_width(),position[1]+y_offset,sub.get_width(),30)
                     self.multi_select_rects.append(pygame.Rect(position[0],position[1]+y_offset,50,30))
@@ -206,8 +207,9 @@ class renderer:
                     self.multi_int_val %= self.multi_max_val
                 else:
                     text = self.font_small.render(i, True, (0,0,0))
-                    pygame.draw.rect(self.screen, color, (position[0],position[1]+y_offset,text.get_width()+20,30))
-                    self.screen.blit(text, (position[0]+10,position[1]+y_offset))
+                    if not second_time:
+                        pygame.draw.rect(self.screen, color, (position[0],position[1]+y_offset,text.get_width()+20,30))
+                        self.screen.blit(text, (position[0]+10,position[1]+y_offset))
                     self.multi_select_rects.append(pygame.Rect(position[0],position[1]+y_offset,text.get_width()+20,30))
                     self.multi_select_values.append(i)
                     self.multi_add_rect = None
@@ -215,8 +217,9 @@ class renderer:
 
             return
         text = self.font_small.render(str(current), True, (0,0,0))
-        pygame.draw.rect(self.screen, color, (position[0],position[1],text.get_width()+20,30))
-        self.screen.blit(text, (position[0]+10,position[1]))
+        if not second_time:
+            pygame.draw.rect(self.screen, color, (position[0],position[1],text.get_width()+20,30))
+            self.screen.blit(text, (position[0]+10,position[1]))
         if self.open_selector is not None:
             if len(self.multi_select_rects) == self.open_selector:
                 self.multi_select_args = (position,place,current,color,True)
@@ -228,15 +231,16 @@ class renderer:
 
         text = self.font_small.render(str(current), True, (0,0,0))
         return text.get_width()+20
-    def render_block_label(self, position, label,block, color=(255,255,255)):
+    def render_block_label(self, position, label,block, color=(255,255,255),second_time=False):
         x_pos = 0
         for i in label:
             if type(i) == BlockLabelText:
                 text = self.font.render(i.text, True, (0,0,0))
-                self.screen.blit(text, (position[0]+x_pos,position[1]))
+                if not second_time:
+                    self.screen.blit(text, (position[0]+x_pos,position[1]))
                 x_pos += text.get_width()+10
             if type(i) == BlockLabelMultiSelect:
-                self.render_multi_select((position[0]+x_pos,position[1]), i.place, block.multiSelect[i.index],color,block=block, index = i.index)
+                self.render_multi_select((position[0]+x_pos,position[1]), i.place, block.multiSelect[i.index],color,block=block, index = i.index, second_time = second_time)
                 x_pos += self.get_multi_select_width(block.multiSelect[i.index])+10
     def get_block_label_width(self, label, block):
         x_pos = 0
@@ -281,7 +285,7 @@ class renderer:
             startIndex, endIndex = newIndex, newIndex + (endIndex-startIndex)
         else:
             self.new_program = self.program.copy()
-    def render_block(self, position, block,width, indentLevel, selectIndentLevel, offset, x_offset, is_sub_if = False, is_first_if = True, only_selected = False):
+    def render_block(self, position, block,width, indentLevel, selectIndentLevel, offset, x_offset, is_sub_if = False, is_first_if = True, second_time = False):
         if block.midIndent:
             position = (position[0]-20,position[1])
             x_offset = x_offset - 20
@@ -290,7 +294,7 @@ class renderer:
             first = True
             for subBlock in block.blockList:
                 temp_width = self.get_block_label_width(subBlock.toShowOnBlock(),subBlock)
-                self.render_block((position[0], position[1]+temp_offset), subBlock,temp_width, indentLevel, selectIndentLevel, offset+temp_offset, x_offset, is_sub_if = True, is_first_if=first)
+                self.render_block((position[0], position[1]+temp_offset), subBlock,temp_width, indentLevel, selectIndentLevel, offset+temp_offset, x_offset, is_sub_if = True, is_first_if=first,second_time=second_time)
                 first = False
                 temp_offset += 40
             return
@@ -300,15 +304,18 @@ class renderer:
         indentColor = (150,150,0)
         x,y = self.position
         y = y - self.scroll
-        pygame.draw.rect(self.screen, block.color, (position[0],position[1],max(200,width+40),40))
+        if not second_time:
+            pygame.draw.rect(self.screen, block.color, (position[0],position[1],max(200,width+40),40))
         if block.startIndent:
-            pygame.draw.rect(self.screen, block.color, (position[0],position[1],10,50))
-        self.render_block_label((position[0]+25,position[1]+5),block.toShowOnBlock(),block,saturateRGB(block.color,1.5))
+            if not second_time:
+                pygame.draw.rect(self.screen, block.color, (position[0],position[1],10,50))
+        self.render_block_label((position[0]+25,position[1]+5),block.toShowOnBlock(),block,saturateRGB(block.color,1.5),second_time=second_time)
         for i in range(indentLevel): 
-            if i < selectIndentLevel:
-                pygame.draw.rect(self.screen, indentColor, (x+i*20,y+offset-10,10,60)) 
-            else:
-                pygame.draw.rect(self.screen, indentColor, (position[0]-x_offset+(i-selectIndentLevel)*20,position[1]-10,10,60))
+            if not second_time:
+                if i < selectIndentLevel:
+                    pygame.draw.rect(self.screen, indentColor, (x+i*20,y+offset-10,10,60)) 
+                else:
+                    pygame.draw.rect(self.screen, indentColor, (position[0]-x_offset+(i-selectIndentLevel)*20,position[1]-10,10,60))
     def get_height_of_y_pos(self, y_pos):
         current_height = 0
         index = 0
@@ -346,7 +353,7 @@ class renderer:
         else:
             self.new_program = self.program.copy() 
         return startIndex, endIndex
-    def render_program(self):
+    def render_program(self,second_time = False):
         self.multi_select_args = None
         x,y = self.position 
         y = y - self.scroll
@@ -374,7 +381,7 @@ class renderer:
                 x_offset = (indentLevel-selectIndentLevel)*20 
                 self.render_block((mouse_pos[0] - self.selected_anchor[0] + x_offset,mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset), block, width,indentLevel,selectIndentLevel, offset, x_offset)
             else:
-                self.render_block((x+x_offset,y+offset), block, width,indentLevel, indentLevel, offset, 0)
+                self.render_block((x+x_offset,y+offset), block, width,indentLevel, indentLevel, offset, 0,second_time=second_time)
             offset += block.height 
             if block.startIndent: 
                 indentLevel += 1 
@@ -386,6 +393,7 @@ class renderer:
                 draw_arrow(screen, self.end_of_blocks[i], self.end_of_blocks[block.jump_loc], x_pos, color = randomRGB())
                 x_pos += 20
     def tick_runner(self):
+        self.last_move = None
         if self.check_win():
             self.playing = False
             self.won = True
