@@ -7,6 +7,8 @@ def getBlockWrapper(blockList):
 class Block:
     height = 50
     minWidth = 200
+    size = 1
+    width = None
     startIndent = False
     endIndent = False
     midIndent = False

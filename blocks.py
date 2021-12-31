@@ -40,20 +40,64 @@ def exampleBlock(blockList):
 """
 
 @blockWrapper
-class waitBlock(Block):
-    startIndent = False
+class repeatBlock(Block):
+    startIndent = True
     endIndent = False
-    prefix = "wait"
-    color = (0,255,255)
-    default_args = ["0"]
-    def __init__(self, time):
-        time = typeCheck(time, int, ParserError, "Wait time must be an integer")
-        self.time = time
+    prefix = "repeat"
+    color = (0,128,128)
+    default_args = ["1"]
+    def __init__(self, repeat_amount):
+        repeat_amount = typeCheck(repeat_amount, int, ParserError, "Wait time must be an integer")
+        self.repeat_amount = repeat_amount
+        self.repeated = 0
+        self.multiSelect = [repeat_amount]
     def run(self, runner):
-        return runner.timesRunCurrent >= self.time
-        #waits time ticks before returning true
+        self.repeated = 0
+        return True
     def toText(self):
-        return "wait " + str(self.time)
+        return "repeat " + str(self.repeat_amount)
+    def fromText(text):
+        return waitBlock(text[5:])
+    def validateValues(self):
+        return True
+    def toShowOnBlock(self):
+        return [BlockLabelText("repeat "), BlockLabelMultiSelect("pint", 0)]
+    def setMultiSelect(self, index, value):
+        if index == 0:
+            self.repeat_amount = value
+        self.multiSelect[index] = value
+@blockWrapper
+class endRepeatBlock(Block):
+    startIndent = False
+    endIndent = True
+    prefix = "endrepeat"
+    color = (0,128,128)
+    height = 10
+    minWidth = 0
+    width = 0
+    size = 0
+    def run(self, runner):
+        position = runner.programCounter
+        indent = 1
+        while indent > 0:
+            position -= 1
+            if 0 > position:
+                break
+            block = runner.program[position]
+            if block.endIndent:
+                indent += 1
+            elif block.startIndent:
+                indent -= 1
+        block.repeated += 1
+        print(block.repeated, block.repeat_amount, position)
+        if block.repeated >= block.repeat_amount:
+            runner.programCounter += 1
+            runner.tick_runner()
+            return False
+        runner.programCounter = position
+        return True
+    def toText(self):
+        return ""
     def fromText(text):
         return waitBlock(text[5:])
     def validateValues(self):
@@ -128,3 +172,4 @@ class jumpToBlock(Block):
         return type(jump_id) == int
 
 jumpBlock.blocks_added_after = [jumpToBlock]
+repeatBlock.blocks_added_after = [endRepeatBlock]

@@ -32,7 +32,7 @@
             "desc": "Learn how to reduce code repetition with loops",
             "type": "grid",
             "color": [50, 68, 227],
-            "children": [],
+            "children": [2],
             "challenge_size": 3,
             "challenge_speed": 7,
             "blocks": [
@@ -49,6 +49,35 @@
                 "player_y": 1,
                 "goal_x": 8,
                 "goal_y": 1,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor"
+                }
+            }
+        },
+        {   "name": "STOP!",
+            "desc": "Learn how to use finite loops",
+            "type": "grid",
+            "color": [74, 50, 227],
+            "children": [],
+            "challenge_size": 6,
+            "challenge_speed": 7,
+            "blocks": [
+                "move",
+                "repeat"
+            ],
+            "data": {
+                "grid": [
+                    [ "X","X","X","X","X","X","X","X","X","X" ],
+                    [ "X","O","O","O","O","O","O","O","O","X" ],
+                    [ "X","X","X","X","X","X","X","X","O","X" ],
+                    [ "X","O","O","O","O","O","O","O","O","X" ],
+                    [ "X","X","X","X","X","X","X","X","X","X" ]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 1,
+                "goal_y": 3,
                 "grid_key": {
                     "X": "wall",
                     "O": "floor"

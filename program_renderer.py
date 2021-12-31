@@ -30,6 +30,7 @@ class renderer:
         self.multi_add_rect = None
         self.multi_int_val = 0
         self.multi_max_val = 100
+        self.multi_min_val = 0
         self.multi_select_args = None
         self.multi_select_block = None
         self.multi_select_index = None
@@ -116,15 +117,15 @@ class renderer:
                     close = True
                     if self.multi_add_rect and self.multi_add_rect.collidepoint(mouse_pos):
                         self.multi_int_val += 1
-                        self.multi_int_val %= self.multi_max_val
+                        self.multi_int_val = max(min(self.multi_int_val,self.multi_max_val -1),self.multi_min_val)
                         close = False
                     if self.multi_sub_rect and self.multi_sub_rect.collidepoint(mouse_pos):
                         self.multi_int_val -= 1
-                        self.multi_int_val %= self.multi_max_val
+                        self.multi_int_val = max(min(self.multi_int_val,self.multi_max_val -1),self.multi_min_val)
                         close = False
                     for v,i in enumerate(self.multi_select_rects):
                         if i.collidepoint(event.pos):
-                            if self.multi_select_values[v] == "number" or self.multi_select_values[v] == "address":
+                            if self.multi_select_values[v] == "number" or self.multi_select_values[v] == "address" or self.multi_select_values[v] == "pint":
                                 self.multi_select_values[v] = self.multi_int_val
                             self.multi_select_block.setMultiSelect(self.multi_select_index, self.multi_select_values[v])
                             break
@@ -194,6 +195,8 @@ class renderer:
             options = ["address"]
         elif place == "move":
             options = ["left","right","up","down"]
+        elif place == "pint":
+            options = ["pint"]
         else:
             raise ValueError(f"invalid place {place}")
         if render_dropdown:
@@ -202,7 +205,7 @@ class renderer:
             y_offset = 0
             for i in options:
                 y_offset += 30
-                if i == "number" or i == "address":
+                if i == "number" or i == "address" or i == "pint":
                     text = self.font_small.render(str(self.multi_int_val).zfill(2), True, (0,0,0))
                     add = self.font_small.render("+", True, (0,0,0))
                     sub = self.font_small.render("-", True, (0,0,0))
@@ -217,9 +220,14 @@ class renderer:
                     self.multi_select_values.append(i)
                     if i == "number":
                         self.multi_max_val = 100
+                        self.multi_min_val = 0
+                    elif i == "pint":
+                        self.multi_max_val = 100
+                        self.multi_min_val = 1
                     else:
+                        self.multi_min_val = 0
                         self.multi_max_val = len(self.program)
-                    self.multi_int_val %= self.multi_max_val
+                    self.multi_int_val = max(min(self.multi_int_val,self.multi_max_val -1),self.multi_min_val)
                 else:
                     text = self.font_small.render(i, True, (0,0,0))
                     if not second_time:
@@ -300,7 +308,7 @@ class renderer:
             startIndex, endIndex = newIndex, newIndex + (endIndex-startIndex)
         else:
             self.new_program = self.program.copy()
-    def render_block(self, position, block,width, indentLevel, selectIndentLevel, offset, x_offset, is_sub_if = False, is_first_if = True, second_time = False):
+    def render_block(self, position, block,width, indentLevel, selectIndentLevel, offset, x_offset, is_sub_if = False, is_first_if = True, second_time = False, indentColors = []):
         if block.midIndent:
             position = (position[0]-20,position[1])
             x_offset = x_offset - 20
@@ -313,14 +321,18 @@ class renderer:
                 first = False
                 temp_offset += 40
             return
+        w = max(block.minWidth,width+40)
+        if block.width is not None:
+            w = block.width
+        if w is 0:
+            second_time = True
         if is_first_if:
-            self.end_of_blocks.append((position[0]+max(block.minWidth,width+40),position[1]+20))
+            self.end_of_blocks.append((position[0]+w,position[1]+20))
             self.rects.append(pygame.Rect(position[0],position[1],max(width,block.minWidth),40))
-        indentColor = (150,150,0)
         x,y = self.position
         y = y - self.scroll
         if not second_time:
-            pygame.draw.rect(self.screen, block.color, (position[0],position[1],max(block.minWidth,width+40),40))
+            pygame.draw.rect(self.screen, block.color, (position[0],position[1],w,40))
         if block.startIndent:
             if not second_time:
                 pygame.draw.rect(self.screen, block.color, (position[0],position[1],10,50))
@@ -328,9 +340,9 @@ class renderer:
         for i in range(indentLevel): 
             if not second_time:
                 if i < selectIndentLevel:
-                    pygame.draw.rect(self.screen, indentColor, (x+i*20,y+offset-10,10,60)) 
+                    pygame.draw.rect(self.screen, indentColors[i], (x+i*20,y+offset-10,10,60)) 
                 else:
-                    pygame.draw.rect(self.screen, indentColor, (position[0]-x_offset+(i-selectIndentLevel)*20,position[1]-10,10,60))
+                    pygame.draw.rect(self.screen, indentColors[i], (position[0]-x_offset+(i-selectIndentLevel)*20,position[1]-10,10,60))
     def get_height_of_y_pos(self, y_pos):
         current_height = 0
         index = 0
@@ -383,23 +395,25 @@ class renderer:
         startIndex, endIndex = self.get_indexes(mouse_pos)
         self.multi_select_rects = []
         self.rects = [] 
+        indentColors = []
         for i,block in enumerate(self.new_program): 
             width = self.get_block_label_width(block.toShowOnBlock(),block)
             if block.endIndent:
-                indentLevel -= 1 
-
+                indentLevel -= 1
+                indentColors.pop()
             x_offset = indentLevel*20 
             if i == startIndex: 
                 selectOffset = - offset 
                 selectIndentLevel = indentLevel 
             if startIndex is not None and i >= startIndex and i < endIndex: 
                 x_offset = (indentLevel-selectIndentLevel)*20 
-                self.render_block((mouse_pos[0] - self.selected_anchor[0] + x_offset,mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset), block, width,indentLevel,selectIndentLevel, offset, x_offset)
+                self.render_block((mouse_pos[0] - self.selected_anchor[0] + x_offset,mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset), block, width,indentLevel,selectIndentLevel, offset, x_offset,indentColors = indentColors)
             else:
-                self.render_block((x+x_offset,y+offset), block, width,indentLevel, indentLevel, offset, 0,second_time=second_time)
+                self.render_block((x+x_offset,y+offset), block, width,indentLevel, indentLevel, offset, 0,second_time=second_time,indentColors = indentColors)
             offset += block.height 
             if block.startIndent: 
-                indentLevel += 1 
+                indentLevel += 1
+                indentColors.append(block.color)
         self.height = offset 
         random.seed(5)
         x_pos = 400

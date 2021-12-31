@@ -94,7 +94,7 @@ def play_level(index):
             program, won = renderer.tick(events)
             pygame.display.flip()
         if won:
-            size = len(program)
+            size = sum(map(lambda x: x.size,program))
             speed = renderer.ticks_passed
             surface = pygame.display.get_surface()
             finished = False
