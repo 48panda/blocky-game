@@ -25,6 +25,14 @@ def draw_level(index,x,y,completed_levels,hover):
     color = levels[index]["color"]
     if index == hover:
         color = saturateRGB(color, 2)
+    new_x = x
+    new_y = y - 200
+    if index in completed_levels:
+        for lvl in levels[index]["children"]:
+            pygame.draw.line(screen,(0,0,0),(x,y),(x,y-100),10)
+            pygame.draw.line(screen,(0,0,0),(x,y-100),(new_x,new_y),10)
+            new_x += 200
+
     pygame.gfxdraw.aacircle(screen,x,y,50,color)
     pygame.gfxdraw.filled_circle(screen,x,y,50,color)
     circle_center = (x,y)
