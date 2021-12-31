@@ -72,9 +72,9 @@ class endRepeatBlock(Block):
     endIndent = True
     prefix = "endrepeat"
     color = (0,128,128)
-    height = 10
-    minWidth = 0
-    width = 0
+    #height = 10
+    #minWidth = 0
+    #width = 0
     size = 0
     def run(self, runner):
         position = runner.programCounter

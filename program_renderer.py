@@ -54,6 +54,7 @@ class renderer:
         self.time_since_last_run = 0
         self.usable_blocks = usable_blocks
         self.won = False
+        self.prevProgramCounter = 0
     def init_block(self,block):
         return block(*block.default_args, **block.default_kwargs)
     def insert_block(self, block, rect):
@@ -308,7 +309,7 @@ class renderer:
             startIndex, endIndex = newIndex, newIndex + (endIndex-startIndex)
         else:
             self.new_program = self.program.copy()
-    def render_block(self, position, block,width, indentLevel, selectIndentLevel, offset, x_offset, is_sub_if = False, is_first_if = True, second_time = False, indentColors = []):
+    def render_block(self, position, block,width, indentLevel, selectIndentLevel, offset, x_offset, is_sub_if = False, is_first_if = True, second_time = False, indentColors = [], highlighted = False):
         if block.midIndent:
             position = (position[0]-20,position[1])
             x_offset = x_offset - 20
@@ -332,6 +333,8 @@ class renderer:
         x,y = self.position
         y = y - self.scroll
         if not second_time:
+            if highlighted:
+                pygame.draw.rect(self.screen, (255,255,0), (position[0]-5,position[1]-5,w+10,50))
             pygame.draw.rect(self.screen, block.color, (position[0],position[1],w,40))
         if block.startIndent:
             if not second_time:
@@ -404,12 +407,13 @@ class renderer:
             x_offset = indentLevel*20 
             if i == startIndex: 
                 selectOffset = - offset 
-                selectIndentLevel = indentLevel 
+                selectIndentLevel = indentLevel
+            highlighted = i == self.prevProgramCounter
             if startIndex is not None and i >= startIndex and i < endIndex: 
                 x_offset = (indentLevel-selectIndentLevel)*20 
-                self.render_block((mouse_pos[0] - self.selected_anchor[0] + x_offset,mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset), block, width,indentLevel,selectIndentLevel, offset, x_offset,indentColors = indentColors)
+                self.render_block((mouse_pos[0] - self.selected_anchor[0] + x_offset,mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset), block, width,indentLevel,selectIndentLevel, offset, x_offset,indentColors = indentColors,highlighted=highlighted)
             else:
-                self.render_block((x+x_offset,y+offset), block, width,indentLevel, indentLevel, offset, 0,second_time=second_time,indentColors = indentColors)
+                self.render_block((x+x_offset,y+offset), block, width,indentLevel, indentLevel, offset, 0,second_time=second_time,indentColors = indentColors,highlighted=highlighted)
             offset += block.height 
             if block.startIndent: 
                 indentLevel += 1
@@ -434,8 +438,10 @@ class renderer:
         self.timesRunCurrent += 1
         if len(self.program) <= self.programCounter:
             return True
+        self.prevProgramCounter = self.programCounter
         result_of_run = self.program[self.programCounter].run(self)
         if result_of_run:
+            self.prevProgramCounter = self.programCounter
             self.programCounter += 1
             self.timesRunCurrent = 0
         if tickCount:
