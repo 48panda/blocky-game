@@ -5,60 +5,55 @@
             "type": "grid",
             "color": [75, 144, 209],
             "children": [1],
-            "challenges":[
-                {
-                    "type": "size",
-                    "value": 6
-                },
-                {
-                    "type": "speed",
-                    "value": 6
-                }
-            ],
+            "challenge_size": 6,
+            "challenge_speed": 6,
             "blocks": [
                 "move"
             ],
             "data": {
                 "grid": [
                     [ "X","X","X","X","X" ],
-                    [ "X","O","O","O","X" ],
-                    [ "X","X","X","O","X" ],
+                    [ "X","X","O","O","X" ],
+                    [ "X","O","X","O","X" ],
                     [ "X","O","O","O","X" ],
                     [ "X","X","X","X","X" ]
                 ],
-                "player_x": 1,
+                "player_x": 2,
                 "player_y": 1,
                 "goal_x": 1,
-                "goal_y": 3,
+                "goal_y": 2,
                 "grid_key": {
                     "X": "wall",
                     "O": "floor"
                 }
             }
         },
-        {
-            "color": [66, 176, 245],
-            "children":[2,3]
-        },
-        {
-            "color": [66, 212, 245],
-            "children":[4]
-        },
-        {
-            "color": [212, 66, 245],
-            "children":[5]
-        },
-        {
-            "color": [42, 250, 119],
-            "children":[6]
-        },
-        {  
-            "color": [224, 58, 164],
-            "children":[]
-        },
-        {
-            "color": [77, 222, 51],
-            "children":[]
+        {   "name": "Repetition",
+            "desc": "Learn how to reduce code repetition with loops",
+            "type": "grid",
+            "color": [50, 68, 227],
+            "children": [],
+            "challenge_size": 3,
+            "challenge_speed": 7,
+            "blocks": [
+                "move",
+                "jump"
+            ],
+            "data": {
+                "grid": [
+                    [ "X","X","X","X","X","X","X","X","X","X" ],
+                    [ "X","O","O","O","O","O","O","O","O","X" ],
+                    [ "X","X","X","X","X","X","X","X","X","X" ]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 8,
+                "goal_y": 1,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor"
+                }
+            }
         }
     ]
 }

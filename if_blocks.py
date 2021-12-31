@@ -55,6 +55,8 @@ class ifBlock(Block):
         if oldValue == "then":
             self.blockList.append(ifSubBlock("0 == 0 then", self))
         self.height = len(self.blockList) * 40 + 10
+    def validateValues(self):
+        return True
 
 
 
@@ -127,6 +129,8 @@ class endifBlock(Block): # block for the end of an if
         return "endif"
     def fromText(text):
         return endifBlock()
+    def validateValues(self):
+        return True
 @blockWrapper
 class elseBlock(Block): # block for the end of an if
     prefix = "else"
@@ -143,7 +147,8 @@ class elseBlock(Block): # block for the end of an if
         return "else"
     def fromText(text):
         return elseBlock()
-
+    def validateValues(self):
+        return True
 
 ifBlock.blocks_added_after = [endifBlock]
 elseBlock.blocks_added_after = [endifBlock]

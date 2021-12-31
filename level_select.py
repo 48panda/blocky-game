@@ -2,6 +2,8 @@ import pygame
 import json
 from pygame import gfxdraw
 from level_runner import play_level
+import os
+import pickle
 
 def saturateRGB(color, saturateAmount):
     return (min(255, max(0, color[0] * saturateAmount)), min(255, max(0, color[1] * saturateAmount)), min(255, max(0, color[2] * saturateAmount)))
@@ -28,7 +30,7 @@ def draw_level(index,x,y,completed_levels,hover):
     circle_center = (x,y)
     text = font.render(str(index+1).zfill(2), True, saturateRGB(color,0.5))
     text_size = text.get_size()
-    screen.blit(text, (circle_center[0]-text_size[0]/2,circle_center[1]-text_size[1]/2))
+    screen.blit(text, (circle_center[0]-text_size[0]//2,circle_center[1]-text_size[1]//2))
     new_x = x
     new_y = y - 200
     if index in completed_levels:
@@ -41,7 +43,14 @@ def get_height(index,completed_levels):
     if index in completed_levels:
         height += max([get_height(lvl,completed_levels) for lvl in levels[index]["children"]])
     return height
-completed = []
+if os.path.isfile("player_data/completed"):
+    with open("player_data/completed", "rb") as f:
+        completed = pickle.load(f)
+        assert type(completed) == list, "Error with data, to fix please delete player_data/completed"
+        for i in completed:
+            assert type(i) == int , "Error with data, to fix please delete player_data/completed"
+else:
+    completed = []
 center_circles = {}
 running = True
 hover = None
@@ -80,6 +89,8 @@ while running:
                     if won:
                         if click not in completed:
                             completed.append(click)
+                            with open("player_data/completed", "wb") as f:
+                                pickle.dump(completed,f)
     screen.fill((255,255,255))
     for i,pos in center_circles.items():
         x,y = pos

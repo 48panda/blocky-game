@@ -6,6 +6,7 @@ def getBlockWrapper(blockList):
     return blockWrapper
 class Block:
     height = 50
+    minWidth = 200
     startIndent = False
     endIndent = False
     midIndent = False
@@ -19,7 +20,6 @@ class Block:
     __repr__ = __str__ # repr is string for now because list stringify uses repr
     def toShowOnBlock(self):
         return [BlockLabelText(self.toText())]
-
 
 class ParserError(Exception):pass # exception we can catch to find invalid text input (will not cause error but show error on screen)
 

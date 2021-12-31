@@ -2,6 +2,7 @@ from blockMaker import *
 from if_blocks import *
 import time
 import operator
+import itertools
 
 #example block
 """
@@ -55,7 +56,8 @@ class waitBlock(Block):
         return "wait " + str(self.time)
     def fromText(text):
         return waitBlock(text[5:])
-
+    def validateValues(self):
+        return True
 @blockWrapper
 class moveBlock(Block):
     prefix = "move"
@@ -76,6 +78,14 @@ class moveBlock(Block):
         return moveBlock(text[5:])
     def toShowOnBlock(self):
         return [BlockLabelText("move "),BlockLabelMultiSelect("move",0)]
+    def validateValues(self):
+        return self.movement_direction in ["left","right","up","down"]
+def jumpIdGenerator():
+    for i in itertools.count():
+        yield i
+        yield i # yield twice, once for jump and once for jumpTo
+
+jumpIdGenerator = jumpIdGenerator()
 
 @blockWrapper
 class jumpBlock(Block):
@@ -83,21 +93,38 @@ class jumpBlock(Block):
     startIndent = False
     endIndent = False
     color = (150,150,0)
-    default_args =["0"]
-    def __init__(self, jump_loc):
-        jump_loc = typeCheck(jump_loc, int, ParserError, "Jump location must be an integer")
-        self.jump_loc = jump_loc
-        self.multiSelect = [self.jump_loc]
-    def setMultiSelect(self, index, value):
-        self.jump_loc = value
-        self.multiSelect[index] = value
+    def __init__(self):
+        self.jump_id = next(jumpIdGenerator)
     def run(self, runner):
-        runner.programCounter = self.jump_loc
+        for i,block in enumerate(runner.program):
+            if isinstance(block, jumpToBlock) and block.jump_id == self.jump_id:
+                runner.programCounter = i
         # set program counter
         return False
     def toText(self):
-        return "jump " + str(self.jump_loc)
+        return "jump "
     def fromText(text):
         return jumpBlock(text[5:])
-    def toShowOnBlock(self):
-        return [BlockLabelText("jump "),BlockLabelMultiSelect("jump",0)]
+    def validateValues(self):
+        return type(jump_id) == int
+@blockWrapper
+class jumpToBlock(Block):
+    prefix = "jumpto"
+    startIndent = False
+    endIndent = False
+    minWidth = 80
+    color = (150,150,0)
+    def __init__(self):
+        self.jump_id = next(jumpIdGenerator)
+    def run(self, runner):
+        runner.programCounter += 1 # go to next instruction
+        runner.tick_runner()
+        return False
+    def toText(self):
+        return ""
+    def fromText(text):
+        return jumpToBlock(text[5:])
+    def validateValues(self):
+        return type(jump_id) == int
+
+jumpBlock.blocks_added_after = [jumpToBlock]

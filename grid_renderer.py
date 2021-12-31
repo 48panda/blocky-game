@@ -9,6 +9,7 @@ class grid_renderer(renderer):
     def init_runner(self, data):
         self.programCounter = 0
         self.timesRunCurrent = 0
+        self.ticks_passed = 0
         grid = data["grid"]
         key = data["grid_key"]
         world = []

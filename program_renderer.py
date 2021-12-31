@@ -1,13 +1,15 @@
 import colorsys
 import random
-
+import blocks
 import pygame
 
 from arrow import *
 from blockMaker import *
 
 
-def randomRGB():
+def randomRGB(seed = None):
+    if seed is not None:
+        random.seed(seed)
     h = random.random()
     s = 0.5
     v = 0.5
@@ -75,7 +77,7 @@ class renderer:
             self.time_since_last_run += time_passed
             if self.time_since_last_run > 1000:
                 self.time_since_last_run = 0
-                self.tick_runner()
+                self.tick_runner(tickCount=True)
         for event in events: 
             mouse_pos = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -137,6 +139,19 @@ class renderer:
                         startIndex, endIndex = self.get_indexes(mouse_pos)
                         self.program = self.new_program
                         del self.program[startIndex:endIndex]
+                        to_delete = []
+                        for i,block in enumerate(self.program):
+                            if hasattr(block,"jump_id"):
+                                found = False
+                                for j,b in enumerate(self.program):
+                                    if j == i:
+                                        continue
+                                    if hasattr(b,"jump_id") and b.jump_id == block.jump_id:
+                                        found = True
+                                if not found:
+                                    to_delete.append(i)
+                        for i in to_delete:
+                            del self.program[i]
                     else:
                         self.program = self.new_program
                     self.selected = None
@@ -299,13 +314,13 @@ class renderer:
                 temp_offset += 40
             return
         if is_first_if:
-            self.end_of_blocks.append((position[0]+max(200,width+40),position[1]+20))
-            self.rects.append(pygame.Rect(position[0],position[1],max(width,200),40))
+            self.end_of_blocks.append((position[0]+max(block.minWidth,width+40),position[1]+20))
+            self.rects.append(pygame.Rect(position[0],position[1],max(width,block.minWidth),40))
         indentColor = (150,150,0)
         x,y = self.position
         y = y - self.scroll
         if not second_time:
-            pygame.draw.rect(self.screen, block.color, (position[0],position[1],max(200,width+40),40))
+            pygame.draw.rect(self.screen, block.color, (position[0],position[1],max(block.minWidth,width+40),40))
         if block.startIndent:
             if not second_time:
                 pygame.draw.rect(self.screen, block.color, (position[0],position[1],10,50))
@@ -390,9 +405,11 @@ class renderer:
         x_pos = 400
         for i,block in enumerate(self.new_program):
             if block.prefix == "jump":
-                draw_arrow(screen, self.end_of_blocks[i], self.end_of_blocks[block.jump_loc], x_pos, color = randomRGB())
-                x_pos += 20
-    def tick_runner(self):
+                for j,b in enumerate(self.new_program):
+                    if isinstance(b, blocks.jumpToBlock) and hasattr(b,"jump_id") and b.jump_id == block.jump_id:
+                        draw_arrow(screen, self.end_of_blocks[i], self.end_of_blocks[j], x_pos, color = randomRGB(seed=block.jump_id))
+                        x_pos += 20
+    def tick_runner(self, tickCount = False):
         self.last_move = None
         if self.check_win():
             self.playing = False
@@ -407,8 +424,8 @@ class renderer:
         if result_of_run:
             self.programCounter += 1
             self.timesRunCurrent = 0
-        if len(self.program) <= self.programCounter:
-            return True
+        if tickCount:
+            self.ticks_passed += 1
         return False
     # functions that each type of level will override
     def init_runner(self, **kwargs):
