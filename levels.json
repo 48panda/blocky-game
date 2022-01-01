@@ -5,6 +5,7 @@
             "type": "grid",
             "color": [75, 144, 209],
             "children": [1],
+            "fork":"center",
             "challenge_size": 6,
             "challenge_speed": 6,
             "blocks": [
@@ -33,6 +34,7 @@
             "type": "grid",
             "color": [50, 68, 227],
             "children": [2],
+            "fork":"center",
             "challenge_size": 3,
             "challenge_speed": 7,
             "blocks": [
@@ -58,10 +60,11 @@
         {   "name": "STOP!",
             "desc": "Learn how to use finite loops",
             "type": "grid",
-            "color": [74, 50, 227],
-            "children": [],
+            "fork":"center",
+            "color": [148, 100, 255],
+            "children": [3],
             "challenge_size": 6,
-            "challenge_speed": 7,
+            "challenge_speed": 30,
             "blocks": [
                 "move",
                 "repeat"
@@ -81,6 +84,42 @@
                 "grid_key": {
                     "X": "wall",
                     "O": "floor"
+                }
+            }
+        },
+        {   "name": "Mind the gap",
+            "desc": "Introduction to holes",
+            "type": "grid",
+            "fork":"center",
+            "color": [148, 100, 255],
+            "children": [],
+            "challenge_size": 19,
+            "challenge_speed": 20,
+            "blocks": [
+                "move",
+                "repeat"
+            ],
+            "data": {
+                "grid": [
+                    [ "X","X","X","X","X","X","X","X","X","X" ],
+                    [ "X","O","O","O","H","O","O","O","H","X" ],
+                    [ "X","H","H","O","H","O","H","O","H","X" ],
+                    [ "X","O","H","O","O","O","H","O","H","X" ],
+                    [ "X","O","H","H","H","O","H","O","O","X" ],
+                    [ "X","O","O","O","O","O","H","H","O","X" ],
+                    [ "X","O","H","H","H","O","H","O","O","X" ],
+                    [ "X","O","O","O","H","H","H","O","H","X" ],
+                    [ "X","O","H","O","O","O","H","O","O","X" ],
+                    [ "X","X","X","X","X","X","X","X","X","X" ]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 8,
+                "goal_y": 8,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor",
+                    "H": "hole"
                 }
             }
         }

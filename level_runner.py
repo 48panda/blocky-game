@@ -90,7 +90,7 @@ def play_level(index):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-            screen.fill((255,255,255))
+            screen.fill((0,0,0))
             program, won = renderer.tick(events)
             pygame.display.flip()
         if won:

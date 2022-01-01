@@ -286,7 +286,7 @@ class renderer:
         self.play_rect = pygame.Rect(position[0],position[1],50,50)
     def move_program(self):
         if self.selected is not None:
-            newIndex = self.get_height_of_y_pos(mouse_pos[1] - self.position[1])
+            newIndex = self.get_height_of_y_pos(mouse_pos[1] - self.position[1] + self.scroll)
             if self.program[startIndex].startIndent: 
                 
                 indent = 1
@@ -366,7 +366,7 @@ class renderer:
         startIndex = self.selected
         endIndex = self.selected + 1 if self.selected is not None else None
         if self.selected is not None:
-            newIndex = self.get_height_of_y_pos(mouse_pos[1] - self.position[1])
+            newIndex = self.get_height_of_y_pos(mouse_pos[1] - self.position[1] + self.scroll)
             if self.program[startIndex].startIndent: 
                 indent = 1
                 while indent:
@@ -408,7 +408,7 @@ class renderer:
             if i == startIndex: 
                 selectOffset = - offset 
                 selectIndentLevel = indentLevel
-            highlighted = i == self.prevProgramCounter
+            highlighted = i == self.prevProgramCounter and self.playing
             if startIndex is not None and i >= startIndex and i < endIndex: 
                 x_offset = (indentLevel-selectIndentLevel)*20 
                 self.render_block((mouse_pos[0] - self.selected_anchor[0] + x_offset,mouse_pos[1] - self.selected_anchor[1] + offset + selectOffset), block, width,indentLevel,selectIndentLevel, offset, x_offset,indentColors = indentColors,highlighted=highlighted)
@@ -428,6 +428,10 @@ class renderer:
                         draw_arrow(screen, self.end_of_blocks[i], self.end_of_blocks[j], x_pos, color = randomRGB(seed=block.jump_id))
                         x_pos += 20
     def tick_runner(self, tickCount = False):
+        if self.runner_fail_check():
+            self.playing = False
+            self.init_runner(**self.runner_init_kwargs)
+            return
         self.last_move = None
         if self.check_win():
             self.playing = False
@@ -469,4 +473,6 @@ class renderer:
     def get_valid_values(self):
         return ["player_x","player_y"]
     def check_win(self):
+        return False
+    def runner_fail_check(self):
         return False

@@ -89,7 +89,6 @@ class endRepeatBlock(Block):
             elif block.startIndent:
                 indent -= 1
         block.repeated += 1
-        print(block.repeated, block.repeat_amount, position)
         if block.repeated >= block.repeat_amount:
             runner.programCounter += 1
             runner.tick_runner()
@@ -150,7 +149,7 @@ class jumpBlock(Block):
     def fromText(text):
         return jumpBlock(text[5:])
     def validateValues(self):
-        return type(jump_id) == int
+        return type(self.jump_id) == int
 @blockWrapper
 class jumpToBlock(Block):
     prefix = "jumpto"
@@ -169,7 +168,7 @@ class jumpToBlock(Block):
     def fromText(text):
         return jumpToBlock(text[5:])
     def validateValues(self):
-        return type(jump_id) == int
+        return type(self.jump_id) == int
 
 jumpBlock.blocks_added_after = [jumpToBlock]
 repeatBlock.blocks_added_after = [endRepeatBlock]

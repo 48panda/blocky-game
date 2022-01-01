@@ -6,10 +6,16 @@ player = pygame.image.load("assets/player_tile.png")
 goal = pygame.image.load("assets/goal.png")
 
 class grid_renderer(renderer):
+    def runner_fail_check(self):
+        if not self.world[self.player_y][self.player_x].player_stand:
+            return True
+        return False
     def init_runner(self, data):
         self.programCounter = 0
+        self.prevProgramCounter = -1
         self.timesRunCurrent = 0
         self.ticks_passed = 0
+        self.time_since_last_run = 1000
         grid = data["grid"]
         key = data["grid_key"]
         world = []
@@ -36,9 +42,6 @@ class grid_renderer(renderer):
         grid_h = grid_cell_size * len(self.world)
         grid_x = (w - grid_w) // 2
         grid_y = (h - grid_h) // 2
-        for y,row in enumerate(self.world):
-            for x,cell in enumerate(row):
-                game.blit(pygame.transform.scale(cell.texture, (grid_cell_size, grid_cell_size)), (grid_x + x * grid_cell_size, grid_y + y * grid_cell_size))
         old_x = self.player_x
         old_y = self.player_y
         if self.last_move == "up":
@@ -54,9 +57,18 @@ class grid_renderer(renderer):
             render_x = old_x * (1-frac) + self.player_x * frac
             render_y = old_y * (1-frac) + self.player_y * frac
         else:
-            render_x = self.player_x
-            render_y = self.player_y
-        game.blit(pygame.transform.scale(player, (grid_cell_size, grid_cell_size)), (grid_x + render_x * grid_cell_size, grid_y + render_y * grid_cell_size))
+            if self.last_move != None and not self.world[self.player_y][self.player_x].player_stand:
+                frac = (self.time_since_last_run - 500) / 500
+                render_x = self.player_x
+                render_y = self.player_y * (1-frac) + (self.player_y + 2) * frac
+            else:  
+                render_x = self.player_x
+                render_y = self.player_y
+        for y,row in enumerate(self.world):
+            for x,cell in enumerate(row):
+                game.blit(pygame.transform.scale(cell.texture, (grid_cell_size, grid_cell_size)), (grid_x + x * grid_cell_size, grid_y + y * grid_cell_size))
+                if max(self.player_x,old_x) == x and max(self.player_y,old_y) == y:
+                    game.blit(pygame.transform.scale(player, (grid_cell_size, grid_cell_size)), (grid_x + render_x * grid_cell_size, grid_y + render_y * grid_cell_size))
         game.blit(pygame.transform.scale(goal, (grid_cell_size, grid_cell_size)), (grid_x + self.goal_x * grid_cell_size, grid_y + self.goal_y * grid_cell_size))
         return game
     def value_getter(self, valueToGet):

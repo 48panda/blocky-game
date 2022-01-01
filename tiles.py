@@ -9,5 +9,8 @@ class wall(tile):
     player_collide = True
 class floor(tile):
     texture = pygame.image.load("assets/tiles/floor.png")
+class hole(tile):
+    player_stand = False
+    texture = pygame.image.load("assets/tiles/hole.png")
 
-tile_key = {"wall":wall, "floor":floor}
+tile_key = {"wall":wall, "floor":floor, "hole":hole}
