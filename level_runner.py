@@ -72,7 +72,7 @@ def play_level(index):
     size_challenge_fail = font2.render(f"Size Challenge: {challenge_size}", True, (64, 2, 0))
     speed_challenge_fail = font2.render(f"Speed Challenge: {challenge_speed}", True, (64, 2, 0))
 
-    renderer = renderers[level["type"]](screen, blocks.blockList, get_block_list_to_show(level), data=level["data"])
+    renderer = renderers[level["type"]](screen, blocks.blockList, get_block_list_to_show(level), data=level["data"],top_text = level.get("top_text",""))
     renderer.program = program
     try_again = True
     running = True

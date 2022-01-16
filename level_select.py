@@ -5,6 +5,7 @@ from level_runner import play_level
 from itertools import count, filterfalse
 import os
 import pickle
+import colorsys
 
 def saturateRGB(color, saturateAmount):
     return (min(255, max(0, color[0] * saturateAmount)), min(255, max(0, color[1] * saturateAmount)), min(255, max(0, color[2] * saturateAmount)))
@@ -23,7 +24,7 @@ def render_multi_line(text, x, y,):
         screen.blit(font3.render(l, 0, (255,255,255)), (x, y + 30*i))
 def draw_level(index,x,y,completed_levels,hover, render = True, screen=screen):
     centers = {index:(x,y)}
-    color = levels[index]["color"]
+    color = saturateRGB(colorsys.hsv_to_rgb(levels[index]["color"], 0.8, 0.6),255)
     if index == hover:
         color = saturateRGB(color, 2)
     forkdir = levels[index]["fork"]
@@ -32,6 +33,7 @@ def draw_level(index,x,y,completed_levels,hover, render = True, screen=screen):
     new_x = x + 200
     if index in completed_levels:
         for lvl in levels[index]["children"]:
+            
             if render:
                 pygame.draw.line(screen,(0,0,0),(x,y),(x+100,y),10)
                 pygame.draw.line(screen,(0,0,0),(x+100,y),(new_x,new_y),10)
@@ -40,6 +42,7 @@ def draw_level(index,x,y,completed_levels,hover, render = True, screen=screen):
                 new_y += 200
             else:
                 new_y -= 200
+
     if render:
         pygame.gfxdraw.aacircle(screen,x,y,50,color)
         pygame.gfxdraw.filled_circle(screen,x,y,50,color)
@@ -56,7 +59,7 @@ def render_circles_to_surface(completed,hover,x,y):
     xmin,ymin = tuple(min(i) for i in zip(*circle_centers.values()))
     level_selector_surface = pygame.Surface((xmax-xmin+100,ymax-ymin+100), pygame.SRCALPHA, 32)
     draw_level(0, 50-xmin, 50-ymin, completed, hover, screen=level_selector_surface)
-    return level_selector_surface, {k:(pos[0] + x + 50, pos[1] + y +50) for k,pos in circle_centers.items()}
+    return level_selector_surface, {k:(pos[0] + x + 50, pos[1] + y +50 - ymin) for k,pos in circle_centers.items()}
 
 def get_height(index,completed_levels):
     height = 200

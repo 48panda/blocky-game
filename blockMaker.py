@@ -6,7 +6,7 @@ def getBlockWrapper(blockList):
     return blockWrapper
 class Block:
     height = 50
-    minWidth = 200
+    minWidth = 100
     size = 1
     width = None
     startIndent = False

@@ -3,7 +3,7 @@
         {   "name": "Getting Started",
             "desc": "Learn how to create programs",
             "type": "grid",
-            "color": [75, 144, 209],
+            "color": 0.35,
             "children": [1],
             "fork":"center",
             "challenge_size": 6,
@@ -12,6 +12,8 @@
                 "move"
             ],
             "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
                 "grid": [
                     [ "X","X","X","X","X" ],
                     [ "X","X","O","O","X" ],
@@ -32,7 +34,7 @@
         {   "name": "Repetition",
             "desc": "Learn how to reduce code repetition with loops",
             "type": "grid",
-            "color": [50, 68, 227],
+            "color": 0.4,
             "children": [2],
             "fork":"center",
             "challenge_size": 3,
@@ -42,6 +44,8 @@
                 "jump"
             ],
             "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
                 "grid": [
                     [ "X","X","X","X","X","X","X","X","X","X" ],
                     [ "X","O","O","O","O","O","O","O","O","X" ],
@@ -61,7 +65,7 @@
             "desc": "Learn how to use finite loops",
             "type": "grid",
             "fork":"center",
-            "color": [148, 100, 255],
+            "color": 0.45,
             "children": [3],
             "challenge_size": 6,
             "challenge_speed": 30,
@@ -70,6 +74,8 @@
                 "repeat"
             ],
             "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
                 "grid": [
                     [ "X","X","X","X","X","X","X","X","X","X" ],
                     [ "X","O","O","O","O","O","O","O","O","X" ],
@@ -91,25 +97,27 @@
             "desc": "Introduction to holes",
             "type": "grid",
             "fork":"center",
-            "color": [148, 100, 255],
-            "children": [],
-            "challenge_size": 19,
-            "challenge_speed": 20,
+            "color": 0.5,
+            "children": [4,8,5],
+            "challenge_size": 12,
+            "challenge_speed": 14,
             "blocks": [
                 "move",
                 "repeat"
             ],
             "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
                 "grid": [
                     [ "X","X","X","X","X","X","X","X","X","X" ],
-                    [ "X","O","O","O","H","O","O","O","H","X" ],
-                    [ "X","H","H","O","H","O","H","O","H","X" ],
-                    [ "X","O","H","O","O","O","H","O","H","X" ],
-                    [ "X","O","H","H","H","O","H","O","O","X" ],
-                    [ "X","O","O","O","O","O","H","H","O","X" ],
-                    [ "X","O","H","H","H","O","H","O","O","X" ],
-                    [ "X","O","O","O","H","H","H","O","H","X" ],
-                    [ "X","O","H","O","O","O","H","O","O","X" ],
+                    [ "X","O","O","O","H","O","O","O","O","X" ],
+                    [ "X","H","H","O","H","O","H","H","O","X" ],
+                    [ "X","O","H","O","O","O","H","H","O","X" ],
+                    [ "X","O","H","H","H","O","H","H","O","X" ],
+                    [ "X","O","O","O","O","O","O","H","O","X" ],
+                    [ "X","O","H","H","H","H","O","H","O","X" ],
+                    [ "X","O","O","O","H","H","O","O","O","X" ],
+                    [ "X","O","H","O","O","O","H","H","O","X" ],
                     [ "X","X","X","X","X","X","X","X","X","X" ]
                 ],
                 "player_x": 1,
@@ -120,6 +128,238 @@
                     "X": "wall",
                     "O": "floor",
                     "H": "hole"
+                }
+            }
+        },
+        {   "name": "Buttons",
+            "desc": "Introduction to buttons",
+            "type": "grid",
+            "fork":"center",
+            "color": 0.55,
+            "children": [6],
+            "challenge_size": 12,
+            "challenge_speed": 14,
+            "blocks": [
+                "move",
+                "repeat"
+            ],
+            "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
+                "grid": [
+                    [ "X","X","X","X","X","X","X","X","X","X" ],
+                    [ "X","O","O","O","O","O","O","O","B","X" ],
+                    [ "X","O","O","O","O","O","O","X","X","X" ],
+                    [ "X","O","O","O","O","O","O","L","O","X" ],
+                    [ "X","O","O","O","O","O","O","L","O","X" ],
+                    [ "X","O","O","O","O","O","O","L","O","X" ],
+                    [ "X","O","O","O","O","O","O","L","O","X" ],
+                    [ "X","O","O","O","O","O","O","L","O","X" ],
+                    [ "X","O","O","O","O","O","O","L","O","X" ],
+                    [ "X","X","X","X","X","X","X","X","X","X" ]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 8,
+                "goal_y": 8,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor",
+                    "H": "hole",
+                    "B": "buttonRed",
+                    "L": "laserVRed"
+                }
+            }
+        },
+        {   "name": "Boxes",
+            "desc": "Introduction to box items",
+            "type": "grid",
+            "top_text":"move the box down one tile",
+            "fork":"center",
+            "color": 0.6,
+            "children": [7],
+            "challenge_size": 10,
+            "challenge_speed": 60,
+            "blocks": [
+                "move",
+                "pickup",
+                "drop"
+            ],
+            "data": {
+                "items":[
+                    {
+                        "type": "box",
+                        "x": 1,
+                        "y": 2,
+                        "value": {
+                            "min": 1,
+                            "max": 99
+                        }
+                    }
+                ],
+                "win_conditions":
+                [
+                    {
+                        "type":"box-at-pos",
+                        "x":1,
+                        "y":3
+                    }
+                ]
+                ,
+                "grid": [
+                    [ "X","X","X"],
+                    [ "X","O","X"],
+                    [ "X","O","X"],
+                    [ "X","G","X"],
+                    [ "X","X","X"]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 1,
+                "goal_y": 3,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor",
+                    "G": "tileGoal"
+                }
+            }
+        },
+        {   "name": "Colours",
+            "desc": "Introduction to differently coloured buttons and lasers",
+            "type": "grid",
+            "fork":"center",
+            "color": 0.6,
+            "children": [],
+            "challenge_size": 10,
+            "challenge_speed": 60,
+            "blocks": [
+                "move",
+                "repeat"
+            ],
+            "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
+                "grid": [
+                    [ "X","X","X","X","X","X","X","X","X","X" ],
+                    [ "X","O","O","O","O","O","O","O","B","X" ],
+                    [ "X","O","O","O","O","O","O","X","X","X" ],
+                    [ "X","O","O","O","O","O","O","l","O","X" ],
+                    [ "X","O","O","O","O","O","O","l","O","X" ],
+                    [ "X","O","O","O","O","O","O","l","O","X" ],
+                    [ "X","O","O","O","O","O","O","l","O","X" ],
+                    [ "X","O","X","L","L","L","L","X","L","X" ],
+                    [ "X","b","X","O","O","O","O","l","O","X" ],
+                    [ "X","X","X","X","X","X","X","X","X","X" ]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 8,
+                "goal_y": 8,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor",
+                    "H": "hole",
+                    "B": "buttonRed",
+                    "L": "laserHRed",
+                    "b": "buttonGreen",
+                    "l": "laserVGreen"
+                }
+            }
+        },
+        {   "name": "Comparing",
+            "desc": "Compare two boxes' values",
+            "type": "grid",
+            "fork":"center",
+            "color": 0.6,
+            "children": [],
+            "challenge_size": 10,
+            "challenge_speed": 60,
+            "blocks": [
+                "move",
+                "pickup",
+                "drop",
+                "if"
+            ],
+            "data": {
+                "items":[
+                    {
+                        "type": "box",
+                        "x": 1,
+                        "y": 1,
+                        "value": {
+                            "min": 1,
+                            "max": 99
+                        }
+                    },
+                    {
+                        "type": "box",
+                        "x": 3,
+                        "y": 1,
+                        "value": {
+                            "min": 1,
+                            "max": 99
+                        }
+                    }
+                ],
+                "win_conditions":[{"type":"goal"}],
+                "grid": [
+                    [ "X","X","X","X","X" ],
+                    [ "X","O","O","O","X" ],
+                    [ "X","O","O","O","X" ],
+                    [ "X","O","O","O","X" ],
+                    [ "X","O","O","O","X" ],
+                    [ "X","X","X","X","X" ]
+                ],
+                "player_x": 2,
+                "player_y": 1,
+                "goal_x": 8,
+                "goal_y": 8,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor",
+                    "H": "hole",
+                    "B": "buttonRed",
+                    "L": "laserHRed",
+                    "b": "buttonGreen",
+                    "l": "laserVGreen"
+                }
+            }
+        },
+        {   "name": "Portals",
+            "desc": "Introduction to portals",
+            "type": "grid",
+            "fork":"center",
+            "color": 0.6,
+            "children": [],
+            "challenge_size": 10,
+            "challenge_speed": 60,
+            "blocks": [
+                "move",
+                "repeat"
+            ],
+            "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
+                "grid": [
+                    [ "X","X","X","X","X","X","X","X","X" ],
+                    [ "X","O","O","O","X","O","O","P","X" ],
+                    [ "X","O","O","O","X","O","O","O","X" ],
+                    [ "X","O","O","O","X","O","O","O","X" ],
+                    [ "X","O","O","O","X","O","O","O","X" ],
+                    [ "X","O","O","O","X","O","O","O","X" ],
+                    [ "X","O","O","O","X","O","O","O","X" ],
+                    [ "X","O","O","O","X","O","O","O","X" ],
+                    [ "X","P","O","O","X","O","O","O","X" ],
+                    [ "X","X","X","X","X","X","X","X","X" ]
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 8,
+                "goal_y": 8,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor",
+                    "P": "portalOrange"
                 }
             }
         }

@@ -67,6 +67,32 @@ class repeatBlock(Block):
             self.repeat_amount = value
         self.multiSelect[index] = value
 @blockWrapper
+class pickupBlock(Block):
+    prefix = "pickup"
+    color = (0,128,0)
+    def run(self, runner):
+        runner.pickup()
+        return True
+    def toText(self):
+        return "pickup"
+    def fromText(text):
+        return pickupBlock()
+    def validateValues(self):
+        return True
+@blockWrapper
+class dropBlock(Block):
+    prefix = "drop"
+    color = (0,128,0)
+    def run(self, runner):
+        runner.drop()
+        return True
+    def toText(self):
+        return "drop"
+    def fromText(text):
+        return dropBlock()
+    def validateValues(self):
+        return True
+@blockWrapper
 class endRepeatBlock(Block):
     startIndent = False
     endIndent = True

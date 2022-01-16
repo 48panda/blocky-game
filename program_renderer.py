@@ -20,6 +20,7 @@ def saturateRGB(color, saturateAmount):
 class renderer:
     # stuff here is for rendering
     def __init__(self, screen, blockList, usable_blocks,/,**kwargs):
+        self.top_text = kwargs.get('top_text','')
         self.init_runner(**kwargs)
         self.blocks = blockList
         self.clock = pygame.time.Clock()
@@ -42,7 +43,7 @@ class renderer:
         self.open_selector = None
         self.play_rect = None
         self.playing = False
-        self.position = (0,0)
+        self.position = (10,10)
         self.program = []
         self.rects = []
         self.runner_init_kwargs = kwargs
@@ -94,7 +95,9 @@ class renderer:
                         if skip:
                             continue
                         for n,i in enumerate(self.multi_select_rects):
-                            if i.collidepoint(event.pos):
+                            if i.collidepoint(event.pos) and mouse_pos[1] < self.screen.get_height() - 200:
+                                self.playing = False
+                                self.init_runner(**self.runner_init_kwargs)
                                 self.open_selector = n
                                 skip = True
                                 break
@@ -105,6 +108,8 @@ class renderer:
                                 if self.program[i].endIndent or self.program[i].midIndent:
                                     pass
                                 else:
+                                    self.playing = False
+                                    self.init_runner(**self.runner_init_kwargs)
                                     self.selected_anchor = (mouse_pos[0]-rect.x,mouse_pos[1]-rect.y) 
                                     self.selected = i 
                         for rect,block in self.empty_block_rects.items():
@@ -157,8 +162,11 @@ class renderer:
                     else:
                         self.program = self.new_program
                     self.selected = None
-        game = self.render_game(self.screen.get_width() - 600, self.screen.get_height() - 200)
-        self.screen.blit(game, (600,0))
+        game = self.render_game(self.screen.get_width() - 600, self.screen.get_height() - 250)
+        self.screen.blit(game, (600,50))
+        pygame.draw.rect(self.screen, (196, 196, 196), pygame.Rect(600,0,self.screen.get_width() - 600,50))
+        text = self.font.render(self.top_text, True, (0,0,0))
+        self.screen.blit(text, (600,5))
         self.render_program() 
         pygame.draw.rect(self.screen, (128,128,128), (0,self.screen.get_height()-200,self.screen.get_width(),200))
         self.render_empty_blocks((100,self.screen.get_height()-200,self.screen.get_width(),200))
@@ -185,7 +193,6 @@ class renderer:
             self.empty_block_rects[(current_x,current_y,current_w+10,40)] = i
             current_x += current_w + 15
     def render_multi_select(self, position, place, current, color=(255,255,255), render_dropdown = False,block=None,index = None,second_time=False):
-
         if place == "if_value":
             options = self.get_valid_values() + ["number"]
         elif place == "if_op":
@@ -325,7 +332,7 @@ class renderer:
         w = max(block.minWidth,width+40)
         if block.width is not None:
             w = block.width
-        if w is 0:
+        if w == 0:
             second_time = True
         if is_first_if:
             self.end_of_blocks.append((position[0]+w,position[1]+20))
@@ -419,7 +426,6 @@ class renderer:
                 indentLevel += 1
                 indentColors.append(block.color)
         self.height = offset 
-        random.seed(5)
         x_pos = 400
         for i,block in enumerate(self.new_program):
             if block.prefix == "jump":
@@ -428,6 +434,7 @@ class renderer:
                         draw_arrow(screen, self.end_of_blocks[i], self.end_of_blocks[j], x_pos, color = randomRGB(seed=block.jump_id))
                         x_pos += 20
     def tick_runner(self, tickCount = False):
+        self.start_of_tick()
         if self.runner_fail_check():
             self.playing = False
             self.init_runner(**self.runner_init_kwargs)
@@ -452,6 +459,8 @@ class renderer:
             self.ticks_passed += 1
         return False
     # functions that each type of level will override
+    def start_of_tick(self):
+        pass
     def init_runner(self, **kwargs):
         # Used to store world states from the level data
         self.world = kwargs
