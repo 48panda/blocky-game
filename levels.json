@@ -64,10 +64,10 @@
         {   "name": "STOP!",
             "desc": "Learn how to use finite loops",
             "type": "grid",
-            "fork":"center",
+            "fork":"up",
             "color": 0.45,
-            "children": [3],
-            "challenge_size": 6,
+            "children": [3,9],
+            "challenge_size": 5,
             "challenge_speed": 30,
             "blocks": [
                 "move",
@@ -99,7 +99,7 @@
             "fork":"center",
             "color": 0.5,
             "children": [4,8,5],
-            "challenge_size": 12,
+            "challenge_size": 11,
             "challenge_speed": 14,
             "blocks": [
                 "move",
@@ -137,7 +137,7 @@
             "fork":"center",
             "color": 0.55,
             "children": [6],
-            "challenge_size": 12,
+            "challenge_size": 7,
             "challenge_speed": 14,
             "blocks": [
                 "move",
@@ -230,7 +230,7 @@
             "fork":"center",
             "color": 0.6,
             "children": [],
-            "challenge_size": 10,
+            "challenge_size": 8,
             "challenge_speed": 60,
             "blocks": [
                 "move",
@@ -301,13 +301,24 @@
                         }
                     }
                 ],
-                "win_conditions":[{"type":"goal"}],
+                "win_conditions":[
+                    {
+                        "type":"box-at-pos",
+                        "x":2,
+                        "y":3
+                    },
+                    {
+                        "type":"box-at-pos",
+                        "x":2,
+                        "y":4
+                    }
+                ],
                 "grid": [
                     [ "X","X","X","X","X" ],
                     [ "X","O","O","O","X" ],
                     [ "X","O","O","O","X" ],
-                    [ "X","O","O","O","X" ],
-                    [ "X","O","O","O","X" ],
+                    [ "X","O","G","O","X" ],
+                    [ "X","O","G","O","X" ],
                     [ "X","X","X","X","X" ]
                 ],
                 "player_x": 2,
@@ -317,11 +328,7 @@
                 "grid_key": {
                     "X": "wall",
                     "O": "floor",
-                    "H": "hole",
-                    "B": "buttonRed",
-                    "L": "laserHRed",
-                    "b": "buttonGreen",
-                    "l": "laserVGreen"
+                    "G": "tileGoal"
                 }
             }
         },
@@ -331,7 +338,7 @@
             "fork":"center",
             "color": 0.6,
             "children": [],
-            "challenge_size": 10,
+            "challenge_size": 2,
             "challenge_speed": 60,
             "blocks": [
                 "move",
@@ -349,17 +356,66 @@
                     [ "X","O","O","O","X","O","O","O","X" ],
                     [ "X","O","O","O","X","O","O","O","X" ],
                     [ "X","O","O","O","X","O","O","O","X" ],
-                    [ "X","P","O","O","X","O","O","O","X" ],
                     [ "X","X","X","X","X","X","X","X","X" ]
                 ],
                 "player_x": 1,
                 "player_y": 1,
-                "goal_x": 8,
-                "goal_y": 8,
+                "goal_x": 7,
+                "goal_y": 7,
                 "grid_key": {
                     "X": "wall",
                     "O": "floor",
                     "P": "portalOrange"
+                }
+            }
+        },
+        {   "name": "Maze",
+            "desc": "Try to get to the goal with as small a program as possible",
+            "type": "grid",
+            "fork":"center",
+            "color": 0.6,
+            "children": [],
+            "challenge_size": 2,
+            "challenge_speed": 60,
+            "blocks": [
+                "move",
+                "repeat",
+                "jump"
+            ],
+            "data": {
+                "items":[],
+                "win_conditions":[{"type":"goal"}],
+                "grid": [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "XOOXOOOOOOOOOOOOOOOX",
+                    "XXOXOXOOOOOOOOOOOOOX",
+                    "XXOXOXOOOOOOOOOOOOOX",
+                    "XXOXOXOOOOOOOOOOOOOX",
+                    "XOOXOXOOOOOOOOOOOOOX",
+                    "XOXOOXOOOOOOOOOOOOOX",
+                    "XOXOXOOOOOOOOOOOOOOX",
+                    "XOXOOXOOOOOOOOOOOOOX",
+                    "XOOXOXOOOOOOOOOOOOOX",
+                    "XXOXOXOOOOOOOOOOOOOX",
+                    "XXOXOXOOOOOOOOOOOOOX",
+                    "XXOXOXOOOOOOOOOOOOOX",
+                    "XOOXOXOOOOOOOOOOOOOX",
+                    "XOXOOXOOOOOOOOOOOOOX",
+                    "XOXOXOOOOOOOOOOOOOOX",
+                    "XOXOXOOOOOOOOOOOOOOX",
+                    "XOXOXOOOOOOOOOOOOOOX",
+                    "XOOOXOOOOOOOOOOOOOOX",
+                    "XXXXXXXXXXXXXXXXXXXX"
+                ],
+                "player_x": 1,
+                "player_y": 1,
+                "goal_x": 18,
+                "goal_y": 18,
+                "grid_key": {
+                    "X": "wall",
+                    "O": "floor",
+                    "B": "buttonRed",
+                    "L": "laserHRed"
                 }
             }
         }

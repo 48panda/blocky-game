@@ -2,10 +2,41 @@ import colorsys
 import random
 import blocks
 import pygame
+import numpy as np
+from PIL import Image
 
 from arrow import *
 from blockMaker import *
 
+def saturateRGB(color, saturateAmount):
+    return (min(255, max(0, color[0] * saturateAmount)), min(255, max(0, color[1] * saturateAmount)), min(255, max(0, color[2] * saturateAmount)))
+color_cache = {}
+def set_color(url, color):
+    original_color = color
+    if (url, color) in color_cache:
+        return color_cache[(url, color)]
+    arr = pygame.image.load(url)
+    r, g, b = np.rollaxis(pygame.surfarray.array3d(arr).swapaxes(0,1), axis=-1)
+    a = pygame.surfarray.array_alpha(arr).swapaxes(0,1)
+    new_a = r
+    new_a = new_a / np.amax(new_a)
+    color = np.array(color) / np.amax(color) * 255
+    new_r = color[0] * new_a
+    new_g = color[1] * new_a
+    new_b = color[2] * new_a
+    new_r = np.clip(new_r, 0, 255)
+    new_g = np.clip(new_g, 0, 255)
+    new_b = np.clip(new_b, 0, 255)
+    new_r = new_r.astype(np.uint8)
+    new_g = new_g.astype(np.uint8)
+    new_b = new_b.astype(np.uint8)
+    im = Image.fromarray(np.dstack((new_r, new_g, new_b, a)))
+    mode = im.mode
+    size = im.size
+    data = im.tobytes()
+    image = pygame.image.fromstring(data, size, mode)
+    color_cache[(url, original_color)] = image
+    return image
 
 def randomRGB(seed = None):
     if seed is not None:
@@ -14,12 +45,10 @@ def randomRGB(seed = None):
     s = 0.5
     v = 0.5
     return tuple(round(i * 255) for i in colorsys.hsv_to_rgb(h,s,v))
-def saturateRGB(color, saturateAmount):
-    return (min(255, max(0, color[0] * saturateAmount)), min(255, max(0, color[1] * saturateAmount)), min(255, max(0, color[2] * saturateAmount)))
 
 class renderer:
     # stuff here is for rendering
-    def __init__(self, screen, blockList, usable_blocks,/,**kwargs):
+    def __init__(self, screen, blockList, usable_blocks,jumpIdGenerator,/,**kwargs):
         self.top_text = kwargs.get('top_text','')
         self.init_runner(**kwargs)
         self.blocks = blockList
@@ -56,7 +85,10 @@ class renderer:
         self.usable_blocks = usable_blocks
         self.won = False
         self.prevProgramCounter = 0
+        self.jumpIdGenerator = jumpIdGenerator
     def init_block(self,block):
+        if block.prefix.startswith("jump"):
+            return block(self.program,self.jumpIdGenerator)
         return block(*block.default_args, **block.default_kwargs)
     def insert_block(self, block, rect):
         rect = pygame.Rect(rect)
@@ -202,7 +234,7 @@ class renderer:
         elif place == "jump":
             options = ["address"]
         elif place == "move":
-            options = ["left","right","up","down"]
+            options = ["udlr"]
         elif place == "pint":
             options = ["pint"]
         else:
@@ -236,6 +268,27 @@ class renderer:
                         self.multi_min_val = 0
                         self.multi_max_val = len(self.program)
                     self.multi_int_val = max(min(self.multi_int_val,self.multi_max_val -1),self.multi_min_val)
+                elif i == "udlr":
+                    up = set_color("assets/arrows/u.png",color)
+                    down = set_color("assets/arrows/d.png",color)
+                    left = set_color("assets/arrows/l.png",color)
+                    right = set_color("assets/arrows/r.png",color)
+                    up = pygame.transform.scale(up,(30,30))
+                    down = pygame.transform.scale(down,(30,30))
+                    left = pygame.transform.scale(left,(30,30))
+                    right = pygame.transform.scale(right,(30,30))
+                    up_rect = self.screen.blit(up, (position[0]+30,position[1]+y_offset))
+                    down_rect = self.screen.blit(down, (position[0]+30,position[1]+60+y_offset))
+                    left_rect = self.screen.blit(left, (position[0],position[1]+30+y_offset))
+                    right_rect = self.screen.blit(right, (position[0]+60,position[1]+30+y_offset))
+                    self.multi_select_rects.append(up_rect)
+                    self.multi_select_rects.append(down_rect)
+                    self.multi_select_rects.append(left_rect)
+                    self.multi_select_rects.append(right_rect)
+                    self.multi_select_values.append("up")
+                    self.multi_select_values.append("down")
+                    self.multi_select_values.append("left")
+                    self.multi_select_values.append("right")
                 else:
                     text = self.font_small.render(i, True, (0,0,0))
                     if not second_time:
@@ -248,6 +301,18 @@ class renderer:
 
             return
         text = self.font_small.render(str(current), True, (0,0,0))
+        if current == "left":
+            left = set_color("assets/arrows/l.png",color)
+            text = pygame.transform.scale(left,(30,30))
+        elif current == "right":
+            right = set_color("assets/arrows/r.png",color)
+            text = pygame.transform.scale(right,(30,30))
+        elif current == "up":
+            up = set_color("assets/arrows/u.png",color)
+            text = pygame.transform.scale(up,(30,30))
+        elif current == "down":
+            down = set_color("assets/arrows/d.png",color)
+            text = pygame.transform.scale(down,(30,30))
         if not second_time:
             pygame.draw.rect(self.screen, color, (position[0],position[1],text.get_width()+20,30))
             self.screen.blit(text, (position[0]+10,position[1]))

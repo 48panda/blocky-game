@@ -3,6 +3,7 @@ from if_blocks import *
 import time
 import operator
 import itertools
+import random
 
 #example block
 """
@@ -149,12 +150,6 @@ class moveBlock(Block):
         return [BlockLabelText("move "),BlockLabelMultiSelect("move",0)]
     def validateValues(self):
         return self.movement_direction in ["left","right","up","down"]
-def jumpIdGenerator():
-    for i in itertools.count():
-        yield i
-        yield i # yield twice, once for jump and once for jumpTo
-
-jumpIdGenerator = jumpIdGenerator()
 
 @blockWrapper
 class jumpBlock(Block):
@@ -162,7 +157,7 @@ class jumpBlock(Block):
     startIndent = False
     endIndent = False
     color = (150,150,0)
-    def __init__(self):
+    def __init__(self, program, jumpIdGenerator):
         self.jump_id = next(jumpIdGenerator)
     def run(self, runner):
         for i,block in enumerate(runner.program):
@@ -183,7 +178,7 @@ class jumpToBlock(Block):
     endIndent = False
     minWidth = 80
     color = (150,150,0)
-    def __init__(self):
+    def __init__(self, program, jumpIdGenerator):
         self.jump_id = next(jumpIdGenerator)
     def run(self, runner):
         runner.programCounter += 1 # go to next instruction

@@ -30,6 +30,8 @@ def draw_level(index,x,y,completed_levels,hover, render = True, screen=screen):
     forkdir = levels[index]["fork"]
     if forkdir == "center":
         new_y = y + 100 * (len(levels[index]["children"]) - 1)
+    else:
+        new_y = y
     new_x = x + 200
     if index in completed_levels:
         for lvl in levels[index]["children"]:
@@ -38,7 +40,7 @@ def draw_level(index,x,y,completed_levels,hover, render = True, screen=screen):
                 pygame.draw.line(screen,(0,0,0),(x,y),(x+100,y),10)
                 pygame.draw.line(screen,(0,0,0),(x+100,y),(new_x,new_y),10)
             centers.update(draw_level(lvl,new_x,new_y,completed_levels,hover, render = render, screen=screen))
-            if forkdir == "up":
+            if forkdir == "down":
                 new_y += 200
             else:
                 new_y -= 200

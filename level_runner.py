@@ -4,7 +4,16 @@ import blocks
 import json
 import pickle
 import os
-
+import itertools
+class jumpIdGenerator:
+            def __init__(self):
+                self.value = 0
+                self.change_next = True
+            def __next__(self):
+                if self.change_next:
+                    self.value += 1
+                self.change_next = not self.change_next
+                return self.value
 def saturateRGB(color, saturateAmount):
     return (min(255, max(0, color[0] * saturateAmount)), min(255, max(0, color[1] * saturateAmount)), min(255, max(0, color[2] * saturateAmount)))
 
@@ -51,6 +60,7 @@ def play_level(index):
             assert "program" in player_data, error_string
             assert "high_score_size" in player_data, error_string
             assert "high_score_speed" in player_data, error_string
+            assert "jump_generator" in player_data, error_string
             assert type(player_data["high_score_size"]) == int, error_string
             assert type(player_data["high_score_speed"]) == int, error_string
             assert type(player_data["program"]) == list, error_string
@@ -58,12 +68,13 @@ def play_level(index):
                 assert hasattr(block, "validateValues"), error_string
                 assert block.validateValues(), error_string
     else:
-        player_data = {"program":[],"high_score_size":-1,"high_score_speed":-1}
+        player_data = {"program":[],"high_score_size":-1,"high_score_speed":-1,"jump_generator":jumpIdGenerator()}
     size = -1
     speed = -1
     program = player_data["program"]
     high_score_size = player_data["high_score_size"]
     high_score_speed = player_data["high_score_speed"]
+
 
     challenge_size = level["challenge_size"]
     challenge_speed = level["challenge_speed"]
@@ -72,7 +83,7 @@ def play_level(index):
     size_challenge_fail = font2.render(f"Size Challenge: {challenge_size}", True, (64, 2, 0))
     speed_challenge_fail = font2.render(f"Speed Challenge: {challenge_speed}", True, (64, 2, 0))
 
-    renderer = renderers[level["type"]](screen, blocks.blockList, get_block_list_to_show(level), data=level["data"],top_text = level.get("top_text",""))
+    renderer = renderers[level["type"]](screen, blocks.blockList, get_block_list_to_show(level),player_data["jump_generator"], data=level["data"],top_text = level.get("top_text",""))
     renderer.program = program
     try_again = True
     running = True
@@ -163,5 +174,5 @@ def play_level(index):
         with open(f"player_data/{index}", "wb") as f:
             high_score_size = minimum_not_negative(high_score_size, size)
             high_score_speed = minimum_not_negative(high_score_speed, speed)
-            pickle.dump({"program":program,"high_score_size":high_score_size,"high_score_speed":high_score_speed}, f)
+            pickle.dump({"program":program,"high_score_size":high_score_size,"high_score_speed":high_score_speed,"jump_generator":renderer.jumpIdGenerator}, f)
     return running, won
