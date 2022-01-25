@@ -369,8 +369,8 @@
                 }
             }
         },
-        {   "name": "Maze",
-            "desc": "Try to get to the goal with as small a program as possible",
+        {   "name": "The spiral Spiral",
+            "desc": "Try to use as few lines as possible",
             "type": "grid",
             "fork":"center",
             "color": 0.6,
